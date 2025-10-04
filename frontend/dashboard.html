@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Social Media Contest Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Contest Dashboard</h1>
+            <p class="subtitle">Real-time contest analytics and metrics</p>
+            <nav>
+                <a href="index.html">Register</a> |
+                <a href="dashboard.html" class="active">Dashboard</a> |
+                <a href="admin.html">Admin</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Contest Selector -->
+            <section class="card">
+                <label for="dashboardContestSelect">Select Contest:</label>
+                <select id="dashboardContestSelect" class="contest-selector">
+                    <option value="">Loading contests...</option>
+                </select>
+            </section>
+
+            <!-- Live Metrics -->
+            <section class="metrics-grid" id="liveMetrics">
+                <div class="metric-card">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-value" id="totalParticipants">-</div>
+                    <div class="metric-label">Total Participants</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">✅</div>
+                    <div class="metric-value" id="qualifiedCount">-</div>
+                    <div class="metric-label">Qualified</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">🏆</div>
+                    <div class="metric-value" id="winnersCount">-</div>
+                    <div class="metric-label">Winners</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">⭐</div>
+                    <div class="metric-value" id="fairnessScore">-</div>
+                    <div class="metric-label">Fairness Score</div>
+                </div>
+            </section>
+
+            <!-- Engagement Chart -->
+            <section class="card">
+                <h2>📈 Engagement Overview</h2>
+                <div id="engagementChart">
+                    <div class="chart-placeholder">
+                        <p>Select a contest to view engagement data</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stage Distribution -->
+            <section class="card">
+                <h2>🔄 Participant Flow</h2>
+                <div id="stageFlow" class="stage-flow">
+                    <div class="stage-item">
+                        <div class="stage-name">Registered</div>
+                        <div class="stage-count" id="stageRegistered">0</div>
+                        <div class="stage-bar">
+                            <div class="stage-progress" id="progressRegistered" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage-arrow">→</div>
+                    <div class="stage-item">
+                        <div class="stage-name">Qualified</div>
+                        <div class="stage-count" id="stageQualified">0</div>
+                        <div class="stage-bar">
+                            <div class="stage-progress" id="progressQualified" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage-arrow">→</div>
+                    <div class="stage-item">
+                        <div class="stage-name">Finalist</div>
+                        <div class="stage-count" id="stageFinalist">0</div>
+                        <div class="stage-bar">
+                            <div class="stage-progress" id="progressFinalist" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="stage-arrow">→</div>
+                    <div class="stage-item">
+                        <div class="stage-name">Winner</div>
+                        <div class="stage-count" id="stageWinner">0</div>
+                        <div class="stage-bar">
+                            <div class="stage-progress" id="progressWinner" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Platform Distribution -->
+            <section class="card">
+                <h2>📱 Platform Distribution</h2>
+                <div id="platformChart" class="chart-container"></div>
+            </section>
+
+            <!-- Recent Winners -->
+            <section class="card">
+                <h2>🎉 Recent Winners</h2>
+                <div id="winnersList" class="winners-list">
+                    <p class="empty-state">No winners announced yet</p>
+                </div>
+            </section>
+
+            <!-- Live Activity Feed -->
+            <section class="card">
+                <h2>⚡ Live Activity</h2>
+                <div id="activityFeed" class="activity-feed">
+                    <p class="empty-state">Waiting for activity...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Social Media Contest Manager | Fair & Transparent</p>
+        </footer>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contest Registration - Social Media Contest Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Social Media Contest Registration</h1>
+            <p class="subtitle">Join our fair and transparent contest system</p>
+        </header>
+
+        <main>
+            <!-- Contest Selection -->
+            <section class="card">
+                <h2>Select Contest</h2>
+                <div id="contestsList" class="contests-grid">
+                    <p class="loading">Loading active contests...</p>
+                </div>
+            </section>
+
+            <!-- Registration Form -->
+            <section class="card" id="registrationSection" style="display: none;">
+                <h2>Register for Contest</h2>
+                <p id="selectedContestInfo" class="info-text"></p>
+
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                        <span id="duplicateWarning" class="warning" style="display: none;">
+                            ⚠️ This email is already registered for this contest
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="socialMediaHandle">Social Media Handle *</label>
+                        <input type="text" id="socialMediaHandle" name="socialMediaHandle" required
+                            placeholder="@yourhandle">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="platform">Platform *</label>
+                        <select id="platform" name="platform" required>
+                            <option value="">Select platform</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Twitter">Twitter</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="referralCode">Referral Code (Optional)</label>
+                        <input type="text" id="referralCode" name="referralCode"
+                            placeholder="Enter referral code if you have one">
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="agreeTerms" required>
+                            I agree to the contest terms and conditions *
+                        </label>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="agreeFairness">
+                            I understand this contest uses fair selection algorithms
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        Register for Contest
+                    </button>
+                </form>
+
+                <div id="formMessage" class="message" style="display: none;"></div>
+            </section>
+
+            <!-- Fairness Information -->
+            <section class="card fairness-info">
+                <h2>✨ Our Fairness Guarantee</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Duplicate Prevention</h3>
+                        <p>Advanced hashing algorithms detect and prevent duplicate entries</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎲</div>
+                        <h3>Fair Selection</h3>
+                        <p>Cryptographically secure random selection ensures equal opportunity</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🛡️</div>
+                        <h3>Fraud Detection</h3>
+                        <p>Real-time fraud detection protects contest integrity</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <h3>Transparent Process</h3>
+                        <p>View live statistics and fairness scores</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Social Media Contest Manager | Fair & Transparent</p>
+            <p><a href="dashboard.html">View Dashboard</a> | <a href="admin.html">Admin Panel</a></p>
+        </footer>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/registration.js"></script>
+</body>
+
+</html>

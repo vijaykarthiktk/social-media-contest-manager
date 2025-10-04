@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Social Media Contest Manager</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>⚙️ Admin Control Panel</h1>
+            <p class="subtitle">Manage contests and select winners</p>
+            <nav>
+                <a href="index.html">Register</a> |
+                <a href="dashboard.html">Dashboard</a> |
+                <a href="admin.html" class="active">Admin</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Create Contest -->
+            <section class="card">
+                <h2>➕ Create New Contest</h2>
+                <form id="createContestForm">
+                    <div class="form-group">
+                        <label for="contestTitle">Contest Title *</label>
+                        <input type="text" id="contestTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contestDescription">Description *</label>
+                        <textarea id="contestDescription" rows="3" required></textarea>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label for="startDate">Start Date *</label>
+                            <input type="datetime-local" id="startDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate">End Date *</label>
+                            <input type="datetime-local" id="endDate" required>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label for="maxParticipants">Max Participants</label>
+                            <input type="number" id="maxParticipants" value="10000">
+                        </div>
+                        <div class="form-group">
+                            <label for="numberOfWinners">Number of Winners *</label>
+                            <input type="number" id="numberOfWinners" value="1" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="fairnessAlgorithm">Fairness Algorithm *</label>
+                        <select id="fairnessAlgorithm" required>
+                            <option value="PureRandom">Pure Random (Equal Probability)</option>
+                            <option value="WeightedRandom">Weighted Random (Engagement-Based)</option>
+                            <option value="PriorityBased">Priority-Based (Top Performers)</option>
+                            <option value="TimeBased">Time-Based (Stratified Sampling)</option>
+                            <option value="Hybrid">Hybrid (Balanced Approach)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Contest</button>
+                </form>
+            </section>
+
+            <!-- Contest Management -->
+            <section class="card">
+                <h2>📋 Contest Management</h2>
+                <select id="adminContestSelect" class="contest-selector">
+                    <option value="">Select a contest...</option>
+                </select>
+
+                <div id="contestControls" style="display: none; margin-top: 20px;">
+                    <div class="admin-controls">
+                        <div class="control-card">
+                            <h3>Contest Status</h3>
+                            <select id="contestStatus" class="contest-selector">
+                                <option value="Draft">Draft</option>
+                                <option value="Active">Active</option>
+                                <option value="Paused">Paused</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <button class="btn btn-primary mt-20" onclick="updateContestStatus()">
+                                Update Status
+                            </button>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Bulk Qualify</h3>
+                            <input type="number" id="qualifyCount" placeholder="Number to qualify"
+                                class="contest-selector">
+                            <button class="btn btn-success mt-20" onclick="bulkQualify()">
+                                Qualify Participants
+                            </button>
+                        </div>
+
+                        <div class="control-card">
+                            <h3>Select Winners</h3>
+                            <input type="number" id="winnerCount" placeholder="Number of winners"
+                                class="contest-selector">
+                            <select id="winnerAlgorithm" class="contest-selector" style="margin-top: 10px;">
+                                <option value="PureRandom">Pure Random</option>
+                                <option value="WeightedRandom">Weighted Random</option>
+                                <option value="PriorityBased">Priority-Based</option>
+                                <option value="TimeBased">Time-Based</option>
+                                <option value="Hybrid">Hybrid</option>
+                            </select>
+                            <button class="btn btn-warning mt-20" onclick="selectWinners()">
+                                🎉 Select Winners
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Overview -->
+            <section class="card">
+                <h2>📊 Analytics Overview</h2>
+                <div id="analyticsContainer">
+                    <p class="empty-state">Select a contest to view analytics</p>
+                </div>
+            </section>
+
+            <!-- Participants List -->
+            <section class="card">
+                <h2>👥 Participants Management</h2>
+                <div style="margin-bottom: 20px;">
+                    <label>Filter by Stage:</label>
+                    <select id="stageFilter" class="contest-selector" onchange="loadParticipants()">
+                        <option value="">All Stages</option>
+                        <option value="Registered">Registered</option>
+                        <option value="Qualified">Qualified</option>
+                        <option value="Finalist">Finalist</option>
+                        <option value="Winner">Winner</option>
+                        <option value="Disqualified">Disqualified</option>
+                    </select>
+                </div>
+                <div id="participantsTable"></div>
+            </section>
+
+            <!-- Fraud Detection Report -->
+            <section class="card">
+                <h2>🛡️ Fraud Detection Report</h2>
+                <button class="btn btn-primary mb-20" onclick="loadFraudReport()">
+                    Generate Fraud Report
+                </button>
+                <div id="fraudReport"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Social Media Contest Manager | Fair & Transparent</p>
+        </footer>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
