@@ -2,30 +2,92 @@
 let selectedContestId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadUserInfo();
     loadUserContests();
     setupEventListeners();
     populateContestSelectors();
+    updateDashboardStats();
 });
+
+// Load and display user information
+function loadUserInfo() {
+    const user = getCurrentUser();
+    if (user) {
+        // Update sidebar user info
+        const userNameElement = document.getElementById('userName');
+        const userEmailElement = document.getElementById('userEmail');
+        const userAvatarElement = document.getElementById('userAvatar');
+
+        if (userNameElement) userNameElement.textContent = user.name || 'User';
+        if (userEmailElement) userEmailElement.textContent = user.email || 'user@example.com';
+        if (userAvatarElement) {
+            userAvatarElement.textContent = (user.name || 'U').charAt(0).toUpperCase();
+        }
+
+        // Update settings form
+        const settingsName = document.getElementById('settingsName');
+        const settingsEmail = document.getElementById('settingsEmail');
+
+        if (settingsName) settingsName.value = user.name || '';
+        if (settingsEmail) settingsEmail.value = user.email || '';
+    }
+}
+
+// Update dashboard stats
+async function updateDashboardStats() {
+    try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=1000`, {
+            headers: getAuthHeaders()
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            const contests = result.data;
+            const activeContests = contests.filter(c => c.status === 'Active').length;
+            const totalParticipants = contests.reduce((sum, c) => sum + (c.currentParticipants || 0), 0);
+            const totalWinners = contests.reduce((sum, c) => sum + (c.winners?.length || 0), 0);
+
+            // Update stat cards
+            const totalContestsEl = document.getElementById('totalContests');
+            const activeContestsEl = document.getElementById('activeContests');
+            const totalParticipantsEl = document.getElementById('totalParticipants');
+            const totalWinnersEl = document.getElementById('totalWinners');
+
+            if (totalContestsEl) totalContestsEl.textContent = contests.length;
+            if (activeContestsEl) activeContestsEl.textContent = activeContests;
+            if (totalParticipantsEl) totalParticipantsEl.textContent = totalParticipants;
+            if (totalWinnersEl) totalWinnersEl.textContent = totalWinners;
+        }
+    } catch (error) {
+        console.error('Error updating dashboard stats:', error);
+    }
+}
 
 function setupEventListeners() {
     const contestSelect = document.getElementById('adminContestSelect');
-    contestSelect.addEventListener('change', (e) => {
-        selectedContestId = e.target.value;
-        if (selectedContestId) {
-            loadContestDetails();
-            loadParticipants();
-            loadContestAnalytics();
-        }
-    });
+    if (contestSelect) {
+        contestSelect.addEventListener('change', (e) => {
+            selectedContestId = e.target.value;
+            if (selectedContestId) {
+                loadContestDetails();
+                loadParticipants();
+                loadContestAnalytics();
+            }
+        });
+    }
 
     const createForm = document.getElementById('createContestForm');
-    createForm.addEventListener('submit', handleCreateContest);
+    if (createForm) {
+        createForm.addEventListener('submit', handleCreateContest);
+    }
 }
 
 // Load user's contests and display in grid
 async function loadUserContests() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`, {
+            headers: getAuthHeaders()
+        });
         const result = await response.json();
 
         if (result.success) {
@@ -117,7 +179,9 @@ function editContest(contestId) {
 
 // Populate all contest selectors
 function populateContestSelectors() {
-    fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`)
+    fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`, {
+        headers: getAuthHeaders()
+    })
         .then(response => response.json())
         .then(result => {
             if (result.success) {
@@ -151,12 +215,14 @@ function populateContestSelectors() {
 
 function populateContestSelector(contests) {
     const select = document.getElementById('adminContestSelect');
+    if (!select) return;
+
     select.innerHTML = '<option value="">Select a contest...</option>';
 
     contests.forEach(contest => {
         const option = document.createElement('option');
         option.value = contest._id;
-        option.textContent = `${contest.title} (${contest.status}) - ${contest.currentParticipants} participants`;
+        option.textContent = `${contest.title} (${contest.status}) - ${contest.currentParticipants || 0} participants`;
         select.appendChild(option);
     });
 }
@@ -173,7 +239,7 @@ async function handleCreateContest(e) {
         maxParticipants: parseInt(document.getElementById('maxParticipants').value),
         numberOfWinners: parseInt(document.getElementById('numberOfWinners').value),
         fairnessAlgorithm: document.getElementById('fairnessAlgorithm').value,
-        status: 'Draft',
+        status: 'Active',
         platforms: ['Instagram', 'Twitter', 'Facebook', 'LinkedIn', 'TikTok', 'YouTube'],
         duplicateCheckEnabled: true,
         fraudDetectionEnabled: true
@@ -184,7 +250,7 @@ async function handleCreateContest(e) {
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify(contestData)
             }
         );
@@ -196,6 +262,7 @@ async function handleCreateContest(e) {
             document.getElementById('createContestForm').reset();
             loadUserContests();
             populateContestSelectors();
+            updateDashboardStats();
             switchTab('contests');
         } else {
             alert('Error creating contest: ' + result.message);
@@ -210,13 +277,22 @@ async function handleCreateContest(e) {
 async function loadContestDetails() {
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}`,
+            {
+                headers: getAuthHeaders()
+            }
         );
         const result = await response.json();
 
         if (result.success) {
-            document.getElementById('contestControls').style.display = 'block';
-            document.getElementById('contestStatus').value = result.data.status;
+            const statusControl = document.getElementById('contestControls');
+            if (statusControl) {
+                statusControl.style.display = 'block';
+            }
+            const statusField = document.getElementById('contestStatus');
+            if (statusField) {
+                statusField.value = result.data.status;
+            }
         }
     } catch (error) {
         console.error('Error loading contest details:', error);
@@ -237,7 +313,7 @@ async function updateContestStatus() {
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}`,
             {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({ status: newStatus })
             }
         );
@@ -248,6 +324,7 @@ async function updateContestStatus() {
             alert('Contest status updated successfully! ✅');
             loadUserContests();
             populateContestSelectors();
+            updateDashboardStats();
         } else {
             alert('Error updating status: ' + result.message);
         }
@@ -279,7 +356,7 @@ async function bulkQualify() {
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}/bulk-qualify`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     contestId: selectedContestId,
                     count: count
@@ -326,7 +403,7 @@ async function selectWinners() {
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}/select-winners`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getAuthHeaders(),
                 body: JSON.stringify({
                     count: count,
                     algorithm: algorithm
@@ -383,12 +460,16 @@ async function loadParticipants() {
                 </div>
             `;
         }
-        document.getElementById('contestActionsCard').style.display = 'none';
+        const actionsCard = document.getElementById('contestActionsCard');
+        if (actionsCard) {
+            actionsCard.style.display = 'none';
+        }
         return;
     }
 
     selectedContestId = contestId;
-    const stage = document.getElementById('stageFilter').value;
+    const stageFilter = document.getElementById('stageFilter');
+    const stage = stageFilter ? stageFilter.value : '';
     let url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${contestId}&limit=500`;
 
     if (stage) {
@@ -396,13 +477,18 @@ async function loadParticipants() {
     }
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            headers: getAuthHeaders()
+        });
         const result = await response.json();
 
         if (result.success) {
             displayParticipantsTable(result.data);
             // Show contest actions card
-            document.getElementById('contestActionsCard').style.display = 'block';
+            const actionsCard = document.getElementById('contestActionsCard');
+            if (actionsCard) {
+                actionsCard.style.display = 'block';
+            }
             // Load contest status
             loadContestStatus(contestId);
         }
@@ -414,7 +500,9 @@ async function loadParticipants() {
 // Load contest status for actions card
 async function loadContestStatus(contestId) {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}`);
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}`, {
+            headers: getAuthHeaders()
+        });
         const result = await response.json();
 
         if (result.success) {
@@ -461,10 +549,10 @@ function displayParticipantsTable(participants) {
                 <td>${p.name}</td>
                 <td>${p.email}</td>
                 <td>${p.platform}</td>
-                <td><span class="contest-status ${p.stage.toLowerCase()}">${p.stage}</span></td>
-                <td>${p.engagementScore}</td>
-                <td>${p.priority}</td>
-                <td ${fraudClass}>${p.fraudScore}</td>
+                <td><span class="contest-status ${p.stage ? p.stage.toLowerCase() : 'registered'}">${p.stage || 'Registered'}</span></td>
+                <td>${p.engagementScore || 0}</td>
+                <td>${p.priority || 0}</td>
+                <td ${fraudClass}>${p.fraudScore || 0}</td>
                 <td>${new Date(p.registrationDate).toLocaleDateString()}</td>
             </tr>
         `;
@@ -497,7 +585,10 @@ async function loadAnalytics() {
                 </div>
             `;
         }
-        document.getElementById('fraudCard').style.display = 'none';
+        const fraudCard = document.getElementById('fraudCard');
+        if (fraudCard) {
+            fraudCard.style.display = 'none';
+        }
         return;
     }
 
@@ -505,13 +596,19 @@ async function loadAnalytics() {
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}/analytics`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}/analytics`,
+            {
+                headers: getAuthHeaders()
+            }
         );
         const result = await response.json();
 
         if (result.success) {
             displayAnalytics(result.data);
-            document.getElementById('fraudCard').style.display = 'block';
+            const fraudCard = document.getElementById('fraudCard');
+            if (fraudCard) {
+                fraudCard.style.display = 'block';
+            }
         }
     } catch (error) {
         console.error('Error loading analytics:', error);
@@ -524,7 +621,10 @@ async function loadContestAnalytics() {
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}/analytics`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}/analytics`,
+            {
+                headers: getAuthHeaders()
+            }
         );
         const result = await response.json();
 
@@ -546,42 +646,42 @@ function displayAnalytics(analytics) {
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-label">Total Registrations</div>
-                <div class="stat-value">${contest.totalRegistrations}</div>
+                <div class="stat-value">${contest.totalRegistrations || 0}</div>
                 <div class="stat-change">
                     <i class="fas fa-users"></i> All entries
                 </div>
             </div>
             <div class="stat-card green">
                 <div class="stat-label">Qualified</div>
-                <div class="stat-value">${contest.qualifiedParticipants}</div>
+                <div class="stat-value">${contest.qualifiedParticipants || 0}</div>
                 <div class="stat-change">
                     <i class="fas fa-check-circle"></i> Approved
                 </div>
             </div>
             <div class="stat-card purple">
                 <div class="stat-label">Finalists</div>
-                <div class="stat-value">${contest.finalists}</div>
+                <div class="stat-value">${contest.finalists || 0}</div>
                 <div class="stat-change">
                     <i class="fas fa-star"></i> Top performers
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Fairness Score</div>
-                <div class="stat-value">${contest.fairnessScore}%</div>
+                <div class="stat-value">${contest.fairnessScore || 100}%</div>
                 <div class="stat-change">
                     <i class="fas fa-balance-scale"></i> Algorithm rating
                 </div>
             </div>
             <div class="stat-card orange">
                 <div class="stat-label">Duplicates Detected</div>
-                <div class="stat-value">${contest.duplicatesDetected}</div>
+                <div class="stat-value">${contest.duplicatesDetected || 0}</div>
                 <div class="stat-change">
                     <i class="fas fa-exclamation-triangle"></i> Flagged
                 </div>
             </div>
             <div class="stat-card" style="border-left-color: #ef4444;">
                 <div class="stat-label">Fraud Attempts</div>
-                <div class="stat-value">${contest.fraudAttempts}</div>
+                <div class="stat-value">${contest.fraudAttempts || 0}</div>
                 <div class="stat-change" style="color: #ef4444;">
                     <i class="fas fa-shield-alt"></i> Blocked
                 </div>
@@ -601,7 +701,10 @@ async function loadFraudReport() {
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ANALYTICS}/fraud?contestId=${selectedContestId}`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ANALYTICS}/fraud?contestId=${selectedContestId}`,
+            {
+                headers: getAuthHeaders()
+            }
         );
         const result = await response.json();
 
@@ -657,4 +760,42 @@ function displayFraudReport(report) {
     }
 
     container.innerHTML = html;
+}
+
+// Tab switching function
+function switchTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+
+    // Show selected tab content
+    const selectedTab = document.getElementById(`tab-${tabName}`);
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+    }
+
+    // Add active class to selected tab button
+    const selectedBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (selectedBtn) {
+        selectedBtn.classList.add('active');
+    }
+
+    // Load data for specific tabs
+    if (tabName === 'participants') {
+        loadParticipants();
+    } else if (tabName === 'analytics') {
+        loadAnalytics();
+    }
+}
+
+// Refresh overview
+function refreshOverview() {
+    updateDashboardStats();
+    loadUserContests();
 }
