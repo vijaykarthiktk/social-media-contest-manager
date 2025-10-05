@@ -12,7 +12,7 @@ const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', '
 // Connect to MongoDB
 async function connectDB() {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/contest-manager', {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/contest_manager', {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
@@ -70,7 +70,7 @@ async function generateContests() {
             maxParticipants: 3000,
             numberOfWinners: 10,
             status: 'Draft',
-            fairnessAlgorithm: 'Hybrid',
+            fairnessAlgorithm: 'PriorityBased',
             platforms: ['Instagram', 'TikTok', 'YouTube'],
             campaignId: 'INFLUENCER2025',
             duplicateCheckEnabled: true,

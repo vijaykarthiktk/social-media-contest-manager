@@ -2,6 +2,14 @@
 const API_CONFIG = {
     BASE_URL: 'http://localhost:3000/api',
     ENDPOINTS: {
+        AUTH: {
+            REGISTER: '/auth/register',
+            LOGIN: '/auth/login',
+            LOGOUT: '/auth/logout',
+            ME: '/auth/me',
+            UPDATE_PASSWORD: '/auth/updatepassword',
+            CREATE_ADMIN: '/auth/create-admin'
+        },
         CONTESTS: '/contests',
         PARTICIPANTS: '/participants',
         ANALYTICS: '/analytics'

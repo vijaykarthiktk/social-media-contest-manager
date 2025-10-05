@@ -27,6 +27,10 @@ app.use(morgan('dev')); // Logging
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
+// Cookie parser (for handling JWT in cookies)
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -36,6 +40,7 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Routes
+app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/contests', require('./routes/contestRoutes'));
 app.use('/api/participants', require('./routes/participantRoutes'));
 app.use('/api/analytics', require('./routes/analyticsRoutes'));
