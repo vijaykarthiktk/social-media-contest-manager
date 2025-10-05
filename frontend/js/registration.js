@@ -1,6 +1,7 @@
 // Registration Form Handler
 let selectedContestId = null;
 let allContests = [];
+let filteredContests = [];
 let isLoggedIn = false;
 
 // Check if user is logged in
@@ -19,7 +20,7 @@ function checkAuth() {
     if (isLoggedIn) {
         sidebar.style.display = 'flex';
         mainContent.style.marginLeft = '260px';
-        publicHero.style.display = 'none';
+        if (publicHero) publicHero.style.display = 'none';
         if (loginBtn) loginBtn.style.display = 'none';
         if (refreshBtn) refreshBtn.style.display = 'block';
         if (mobileMenuBtn) mobileMenuBtn.style.display = 'flex';
@@ -31,7 +32,7 @@ function checkAuth() {
     } else {
         sidebar.style.display = 'none';
         mainContent.style.marginLeft = '0';
-        publicHero.style.display = 'block';
+        if (publicHero) publicHero.style.display = 'block';
         if (loginBtn) loginBtn.style.display = 'flex';
         if (refreshBtn) refreshBtn.style.display = 'none';
         if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
@@ -41,28 +42,35 @@ function checkAuth() {
 // Load active contests on page load
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
-    loadActiveContests();
+    loadContests();
     setupFormHandlers();
     setupSearch();
+    setupFilters();
+    loadStats();
 });
 
-// Load active contests
-async function loadActiveContests() {
+// Load all contests
+async function loadContests() {
     try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?status=Active`);
+        const statusFilter = document.getElementById('statusFilter')?.value || 'Active';
+        const url = statusFilter === 'all'
+            ? `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`
+            : `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?status=${statusFilter}&limit=100`;
+
+        const response = await fetch(url);
         const result = await response.json();
 
-        if (result.success && result.data.length > 0) {
+        if (result.success) {
             allContests = result.data;
-            displayContests(result.data);
+            filteredContests = result.data;
+            applyFiltersAndSort();
         } else {
-            document.getElementById('contestGrid').innerHTML = '';
-            document.getElementById('noContestsMessage').style.display = 'flex';
+            showNoContests();
         }
     } catch (error) {
         console.error('Error loading contests:', error);
         document.getElementById('contestGrid').innerHTML = `
-            <div class="empty-state">
+            <div class="loading-state">
                 <i class="fas fa-exclamation-triangle"></i>
                 <p>Error loading contests. Please try again later.</p>
             </div>
@@ -72,32 +80,65 @@ async function loadActiveContests() {
 
 // Refresh contests
 function refreshContests() {
-    loadActiveContests();
+    document.getElementById('contestGrid').innerHTML = `
+        <div class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Refreshing contests...</p>
+        </div>
+    `;
+    loadContests();
+    loadStats();
+}
+
+// Load statistics
+async function loadStats() {
+    try {
+        // Get all contests for stats
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=1000`);
+        const result = await response.json();
+
+        if (result.success) {
+            const contests = result.data;
+            const activeContests = contests.filter(c => c.status === 'Active').length;
+            const totalParticipants = contests.reduce((sum, c) => sum + (c.currentParticipants || 0), 0);
+            const totalWinners = contests.reduce((sum, c) => sum + (c.winners?.length || 0), 0);
+
+            document.getElementById('totalContests').textContent = activeContests;
+            document.getElementById('totalParticipants').textContent = totalParticipants.toLocaleString();
+            document.getElementById('totalWinners').textContent = totalWinners.toLocaleString();
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+    }
 }
 
 // Display contests
 function displayContests(contests) {
     const contestGrid = document.getElementById('contestGrid');
+    const noContestsMessage = document.getElementById('noContestsMessage');
 
     if (contests.length === 0) {
-        contestGrid.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-inbox"></i>
-                <h3>No Active Contests</h3>
-                <p>There are no active contests available at the moment. Please check back later!</p>
-            </div>
-        `;
+        showNoContests();
         return;
     }
 
     contestGrid.innerHTML = '';
+    noContestsMessage.style.display = 'none';
 
     contests.forEach(contest => {
         const spotsLeft = contest.maxParticipants - (contest.currentParticipants || 0);
         const endDate = new Date(contest.endDate);
         const startDate = new Date(contest.startDate);
-        const isExpiringSoon = (endDate - new Date()) < 7 * 24 * 60 * 60 * 1000; // 7 days
+        const now = new Date();
+        const daysLeft = Math.ceil((endDate - now) / (1000 * 60 * 60 * 24));
+        const isExpiringSoon = daysLeft <= 7 && daysLeft > 0;
         const isActive = contest.status === 'Active';
+        const isUpcoming = contest.status === 'Upcoming';
+        const isCompleted = contest.status === 'Completed';
+
+        let badgeClass = 'badge-secondary';
+        if (isActive) badgeClass = 'badge-success';
+        if (isUpcoming) badgeClass = 'badge-warning';
 
         const contestCard = document.createElement('div');
         contestCard.className = 'contest-card';
@@ -106,7 +147,7 @@ function displayContests(contests) {
                 <div class="contest-icon">
                     <i class="fas fa-trophy"></i>
                 </div>
-                <span class="contest-badge ${isActive ? 'badge-success' : 'badge-secondary'}">
+                <span class="contest-badge ${badgeClass}">
                     ${contest.status}
                 </span>
             </div>
@@ -122,12 +163,13 @@ function displayContests(contests) {
                         <i class="fas fa-calendar-alt"></i>
                         <span>${endDate.toLocaleDateString()}</span>
                     </div>
-                    ${isExpiringSoon ? '<div class="meta-item warning"><i class="fas fa-clock"></i><span>Ending Soon</span></div>' : ''}
+                    ${isExpiringSoon ? `<div class="meta-item warning"><i class="fas fa-clock"></i><span>${daysLeft} days left</span></div>` : ''}
+                    ${isCompleted && contest.winners?.length ? `<div class="meta-item"><i class="fas fa-crown"></i><span>${contest.winners.length} winners</span></div>` : ''}
                 </div>
                 <div class="contest-footer">
-                    <div class="spots-indicator" style="color: ${spotsLeft < 10 ? '#ef4444' : '#10b981'};">
+                    <div class="spots-indicator" style="color: ${spotsLeft < 10 ? '#ef4444' : spotsLeft === 0 ? '#6b7280' : '#10b981'};">
                         <i class="fas fa-chair"></i>
-                        <strong>${spotsLeft}</strong> spots left
+                        <strong>${spotsLeft}</strong> spots ${spotsLeft === 0 ? 'filled' : 'left'}
                     </div>
                 </div>
             </div>
@@ -135,77 +177,49 @@ function displayContests(contests) {
 
         if (isActive && spotsLeft > 0) {
             contestCard.style.cursor = 'pointer';
-            contestCard.addEventListener('click', () => selectContest(contest, contestCard));
-            contestCard.addEventListener('mouseenter', () => {
-                contestCard.style.transform = 'translateY(-4px)';
-                contestCard.style.boxShadow = '0 8px 16px rgba(59, 130, 246, 0.15)';
-            });
-            contestCard.addEventListener('mouseleave', () => {
-                contestCard.style.transform = 'translateY(0)';
-                contestCard.style.boxShadow = '';
-            });
-        } else {
-            contestCard.style.opacity = '0.6';
-            contestCard.style.cursor = 'not-allowed';
+            contestCard.addEventListener('click', () => openRegistrationModal(contest));
+        } else if (isCompleted || spotsLeft === 0 || isUpcoming) {
+            contestCard.style.opacity = '0.7';
+            contestCard.style.cursor = 'default';
         }
 
         contestGrid.appendChild(contestCard);
     });
 }
 
-// Select contest
-function selectContest(contest, cardElement) {
+// Show no contests message
+function showNoContests() {
+    document.getElementById('contestGrid').innerHTML = '';
+    document.getElementById('noContestsMessage').style.display = 'flex';
+}
+
+// Open registration modal
+function openRegistrationModal(contest) {
     if (!isLoggedIn) {
         alert('Please login to register for contests');
         window.location.href = 'login.html';
         return;
     }
 
-    // Remove previous selection
-    document.querySelectorAll('.contest-selection-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // Select new contest
-    cardElement.classList.add('selected');
     selectedContestId = contest._id;
-
-    // Show registration form
-    document.getElementById('registrationForm').style.display = 'block';
-    document.getElementById('selectedContestName').textContent = `Registration for: ${contest.title}`;
-    document.getElementById('successMessage').style.display = 'none';
-
-    // Scroll to form
-    document.getElementById('registrationForm').scrollIntoView({
-        behavior: 'smooth'
-    });
+    document.getElementById('selectedContestName').textContent = `${contest.title}`;
+    document.getElementById('registrationModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
 }
 
-// Cancel registration
-function cancelRegistration() {
-    document.getElementById('registrationForm').style.display = 'none';
+// Close registration modal
+function closeRegistrationModal() {
+    document.getElementById('registrationModal').style.display = 'none';
     document.getElementById('participantForm').reset();
     selectedContestId = null;
-
-    // Remove selection
-    document.querySelectorAll('.contest-selection-card').forEach(card => {
-        card.classList.remove('selected');
-    });
+    document.body.style.overflow = 'auto';
 }
 
-// Register another
-function registerAnother() {
-    document.getElementById('successMessage').style.display = 'none';
-    document.getElementById('participantForm').reset();
-    selectedContestId = null;
-
-    // Remove selection
-    document.querySelectorAll('.contest-selection-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // Scroll to top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+// Close success modal
+function closeSuccessModal() {
+    document.getElementById('successModal').style.display = 'none';
+    document.body.style.overflow = 'auto';
+    refreshContests();
 }
 
 // Setup form handlers
@@ -222,14 +236,61 @@ function setupSearch() {
     const searchInput = document.getElementById('contestSearch');
     if (!searchInput) return;
 
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = allContests.filter(contest =>
-            contest.title.toLowerCase().includes(query) ||
-            (contest.description && contest.description.toLowerCase().includes(query))
-        );
-        displayContests(filtered);
+    searchInput.addEventListener('input', () => {
+        applyFiltersAndSort();
     });
+}
+
+// Setup filters
+function setupFilters() {
+    const statusFilter = document.getElementById('statusFilter');
+    const sortBy = document.getElementById('sortBy');
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => {
+            loadContests();
+        });
+    }
+
+    if (sortBy) {
+        sortBy.addEventListener('change', () => {
+            applyFiltersAndSort();
+        });
+    }
+}
+
+// Apply filters and sorting
+function applyFiltersAndSort() {
+    const searchQuery = document.getElementById('contestSearch')?.value.toLowerCase() || '';
+    const sortBy = document.getElementById('sortBy')?.value || 'newest';
+
+    // Filter by search query
+    filteredContests = allContests.filter(contest =>
+        contest.title.toLowerCase().includes(searchQuery) ||
+        (contest.description && contest.description.toLowerCase().includes(searchQuery))
+    );
+
+    // Sort contests
+    switch (sortBy) {
+        case 'newest':
+            filteredContests.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            break;
+        case 'oldest':
+            filteredContests.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+            break;
+        case 'ending':
+            filteredContests.sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
+            break;
+        case 'spots':
+            filteredContests.sort((a, b) => {
+                const spotsA = a.maxParticipants - (a.currentParticipants || 0);
+                const spotsB = b.maxParticipants - (b.currentParticipants || 0);
+                return spotsB - spotsA;
+            });
+            break;
+    }
+
+    displayContests(filteredContests);
 }
 
 
@@ -282,17 +343,15 @@ async function handleFormSubmit(e) {
         const result = await response.json();
 
         if (result.success) {
-            // Hide form and show success message
-            document.getElementById('registrationForm').style.display = 'none';
-            document.getElementById('successMessage').style.display = 'block';
+            // Close registration modal
+            closeRegistrationModal();
+
+            // Show success modal
+            document.getElementById('successModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
 
             // Reset form
             form.reset();
-
-            // Scroll to success message
-            document.getElementById('successMessage').scrollIntoView({
-                behavior: 'smooth'
-            });
         } else {
             alert(result.message || 'Registration failed. Please try again.');
             submitBtn.disabled = false;
@@ -305,6 +364,20 @@ async function handleFormSubmit(e) {
         submitBtn.innerHTML = originalText;
     }
 }
+
+// Close modal when clicking outside
+window.addEventListener('click', (e) => {
+    const registrationModal = document.getElementById('registrationModal');
+    const successModal = document.getElementById('successModal');
+
+    if (e.target === registrationModal) {
+        closeRegistrationModal();
+    }
+
+    if (e.target === successModal) {
+        closeSuccessModal();
+    }
+});
 
 // Logout function
 function logout() {

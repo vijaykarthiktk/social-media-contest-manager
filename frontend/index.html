@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contest Registration - Social Media Contest Manager</title>
+    <title>Home - Contest Manager</title>
 
     <!-- Styles -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,11 +28,15 @@
                 <a href="index.html" class="menu-item active"><i class="fas fa-home"></i><span>Home</span></a>
                 <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="profile.html" class="menu-item"><i class="fas fa-user-circle"></i><span>My Profile</span></a>
-                <a href="profile.html#create" class="menu-item"><i class="fas fa-plus-circle"></i><span>New Contest</span></a>
-                <a href="profile.html#contests" class="menu-item"><i class="fas fa-trophy"></i><span>My Contests</span></a>
-                <a href="profile.html#participants" class="menu-item"><i class="fas fa-users"></i><span>Participants</span></a>
+                <a href="profile.html#create" class="menu-item"><i class="fas fa-plus-circle"></i><span>New
+                        Contest</span></a>
+                <a href="profile.html#contests" class="menu-item"><i class="fas fa-trophy"></i><span>My
+                        Contests</span></a>
+                <a href="profile.html#participants" class="menu-item"><i
+                        class="fas fa-users"></i><span>Participants</span></a>
                 <a href="profile.html#settings" class="menu-item"><i class="fas fa-cog"></i><span>Settings</span></a>
-                <a href="#" class="menu-item" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+                <a href="#" class="menu-item" onclick="logout(); return false;"><i
+                        class="fas fa-sign-out-alt"></i><span>Logout</span></a>
             </div>
         </nav>
         <div class="sidebar-footer">
@@ -48,78 +52,168 @@
 
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
-        <section id="registrationSection">
-            <h1 class="page-title">Contest Registration</h1>
-            <h2>Register for Contest</h2>
-            <p id="selectedContestInfo" class="info-text"></p>
-
-            <form id="participantForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="tel" id="phone" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="platform">Social Media Platform *</label>
-                        <select id="platform" class="form-input" required>
-                            <option value="">Select Platform</option>
-                            <option value="Instagram">Instagram</option>
-                            <option value="Twitter">Twitter</option>
-                            <option value="Facebook">Facebook</option>
-                            <option value="LinkedIn">LinkedIn</option>
-                            <option value="TikTok">TikTok</option>
-                            <option value="YouTube">YouTube</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="profileUrl">Profile URL *</label>
-                        <input type="url" id="profileUrl" class="form-input" placeholder="https://" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="followerCount">Follower Count *</label>
-                        <input type="number" id="followerCount" class="form-input" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="bio">Why do you want to participate?</label>
-                        <textarea id="bio" class="form-input" rows="4" placeholder="Tell us about yourself..."></textarea>
-                    </div>
-                    <div class="form-group checkbox-group">
-                        <input type="checkbox" id="agreeTerms" required>
-                        <label for="agreeTerms">I agree to the contest terms and conditions *</label>
-                        <input type="checkbox" id="agreeFairness">
-                        <label for="agreeFairness">I understand this contest uses fair selection algorithms</label>
-                    </div>
+        <!-- Hero Section -->
+        <section class="hero-section" id="publicHero">
+            <div class="hero-content">
+                <div class="hero-icon">
+                    <i class="fas fa-trophy"></i>
                 </div>
-
-                <div class="card-actions">
-                    <button type="button" class="btn-secondary" onclick="cancelRegistration()">
-                        <i class="fas fa-times"></i> Cancel
+                <h1 class="hero-title">Discover Amazing Contests</h1>
+                <p class="hero-subtitle">Join exciting competitions, showcase your talent, and win incredible prizes!
+                </p>
+                <div class="hero-actions">
+                    <button class="btn-hero-primary" id="loginBtn" onclick="window.location.href='login.html'">
+                        <i class="fas fa-sign-in-alt"></i> Login to Register
                     </button>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-paper-plane"></i> Submit Registration
+                    <button class="btn-hero-secondary"
+                        onclick="document.getElementById('contestsSection').scrollIntoView({behavior: 'smooth'})">
+                        <i class="fas fa-search"></i> Browse Contests
                     </button>
                 </div>
-            </form>
+            </div>
         </section>
 
-        <!-- Success Message -->
-        <div id="successMessage" class="card" style="display: none; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border-color: #10b981;">
-            <div style="text-align: center; padding: 24px;">
-                <div style="font-size: 64px; color: #10b981; margin-bottom: 16px;">
+        <!-- Contests Section -->
+        <section class="contests-section" id="contestsSection">
+            <div class="section-header">
+                <div class="section-title-area">
+                    <h2 class="section-title">
+                        <i class="fas fa-trophy"></i> All Contests
+                    </h2>
+                    <p class="section-subtitle">Explore all available contests and register to participate</p>
+                </div>
+                <button class="btn-refresh" id="refreshBtn" onclick="refreshContests()" style="display: none;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Search and Filter Bar -->
+            <div class="search-filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="contestSearch" placeholder="Search contests by title or description...">
+                </div>
+                <div class="filter-controls">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="Active" selected>Active</option>
+                        <option value="Upcoming">Upcoming</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                    <select id="sortBy" class="filter-select">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="ending">Ending Soon</option>
+                        <option value="spots">Most Spots</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Contests Grid -->
+            <div class="contests-grid" id="contestGrid">
+                <!-- Loading State -->
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading contests...</p>
+                </div>
+            </div>
+
+            <!-- No Contests Message -->
+            <div class="no-contests" id="noContestsMessage" style="display: none;">
+                <div class="empty-icon">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <h3>No Contests Found</h3>
+                <p>There are no contests matching your criteria. Try adjusting your filters.</p>
+            </div>
+        </section>
+
+        <!-- Registration Form Modal -->
+        <div class="modal" id="registrationModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-user-plus"></i> Contest Registration</h2>
+                    <button class="modal-close" onclick="closeRegistrationModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="selected-contest-info" id="selectedContestName"></p>
+
+                    <form id="participantForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="name">Full Name *</label>
+                                <input type="text" id="name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address *</label>
+                                <input type="email" id="email" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input type="tel" id="phone" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="platform">Social Media Platform *</label>
+                                <select id="platform" class="form-input" required>
+                                    <option value="">Select Platform</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="Twitter">Twitter</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="LinkedIn">LinkedIn</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="YouTube">YouTube</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="profileUrl">Profile URL *</label>
+                                <input type="url" id="profileUrl" class="form-input" placeholder="https://" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="followerCount">Follower Count *</label>
+                                <input type="number" id="followerCount" class="form-input" min="0" required>
+                            </div>
+                            <div class="form-group form-group-full">
+                                <label for="bio">Why do you want to participate?</label>
+                                <textarea id="bio" class="form-input" rows="4"
+                                    placeholder="Tell us about yourself..."></textarea>
+                            </div>
+                            <div class="form-group form-group-full checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="agreeTerms" required>
+                                    <span>I agree to the contest terms and conditions *</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="agreeFairness">
+                                    <span>I understand this contest uses fair selection algorithms</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-secondary" onclick="closeRegistrationModal()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-paper-plane"></i> Submit Registration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div class="modal" id="successModal" style="display: none;">
+            <div class="modal-content modal-success">
+                <div class="success-animation">
                     <i class="fas fa-check-circle"></i>
                 </div>
                 <h2>Registration Successful!</h2>
                 <p>Your registration has been submitted successfully. We'll contact you soon!</p>
-                <button class="btn-primary" onclick="registerAnother()">
-                    <i class="fas fa-plus"></i> Register for Another Contest
+                <button class="btn-primary" onclick="closeSuccessModal()">
+                    <i class="fas fa-check"></i> Got it!
                 </button>
             </div>
         </div>
