@@ -1,12 +1,13 @@
 {
     "name": "social-media-contest-manager",
     "version": "1.0.0",
-    "description": "Social Media Contest Manager with Fairness using MongoDB and Firebase",
+    "description": "Social Media Contest Manager with Fairness using MongoDB",
     "main": "backend/server.js",
     "scripts": {
         "start": "node backend/server.js",
         "dev": "nodemon backend/server.js",
         "seed": "node seed.js",
+        "clear-db": "node clear-db.js",
         "setup": "./start.sh",
         "stop": "./stop.sh",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,8 +16,7 @@
         "contest",
         "social-media",
         "fairness",
-        "mongodb",
-        "firebase"
+        "mongodb"
     ],
     "author": "",
     "license": "MIT",
@@ -27,7 +27,6 @@
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
         "express-rate-limit": "^6.10.0",
-        "firebase-admin": "^11.10.1",
         "helmet": "^7.0.0",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^7.5.0",

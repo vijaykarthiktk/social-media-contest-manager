@@ -5,20 +5,12 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/database');
-const { initializeFirebase } = require('./config/firebase');
 
 // Initialize Express app
 const app = express();
 
 // Connect to MongoDB
 connectDB();
-
-// Initialize Firebase (graceful degradation if not configured)
-try {
-    initializeFirebase();
-} catch (error) {
-    console.log('⚠️  Starting without Firebase:', error.message);
-}
 
 // Middleware
 app.use(helmet()); // Security headers

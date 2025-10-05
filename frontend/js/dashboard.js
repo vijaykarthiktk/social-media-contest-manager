@@ -1,21 +1,12 @@
 // Dashboard - Real-time Analytics
 let currentContestId = null;
-let firebaseDb = null;
+let pollingInterval = null;
 
 // Initialize dashboard
 document.addEventListener('DOMContentLoaded', () => {
-    initializeFirebase();
     loadContests();
     setupEventListeners();
 });
-
-// Initialize Firebase for real-time updates
-function initializeFirebase() {
-    if (firebaseInitialized) {
-        firebaseDb = firebase.database();
-        console.log('Firebase real-time database connected');
-    }
-}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -271,49 +262,10 @@ function displayWinners(winners) {
     });
 }
 
-// Subscribe to Firebase real-time updates
+// Subscribe to updates via polling
 function subscribeToRealtimeUpdates(contestId) {
-    if (!firebaseDb) {
-        console.log('Firebase not available - polling for updates');
-        // Fallback to polling
-        startPolling(contestId);
-        return;
-    }
-
-    try {
-        // Listen to metrics updates
-        const metricsRef = firebaseDb.ref(`contests/${contestId}/metrics`);
-        metricsRef.on('value', (snapshot) => {
-            const metrics = snapshot.val();
-            if (metrics) {
-                updateRealtimeMetrics(metrics);
-                addActivityItem(`Metrics updated - ${metrics.totalParticipants} participants`);
-            }
-        });
-
-        // Listen to winners
-        const winnersRef = firebaseDb.ref(`contests/${contestId}/winners`);
-        winnersRef.on('value', (snapshot) => {
-            const winners = snapshot.val();
-            if (winners) {
-                addActivityItem(`🎉 Winners announced! (${Object.keys(winners).length})`);
-            }
-        });
-
-        // Listen to new participants
-        const participantsRef = firebaseDb.ref(`contests/${contestId}/participants`);
-        participantsRef.on('child_added', (snapshot) => {
-            const participant = snapshot.val();
-            if (participant) {
-                addActivityItem(`New participant: ${participant.name} (${participant.platform})`);
-            }
-        });
-
-        console.log('Subscribed to real-time updates');
-    } catch (error) {
-        console.error('Firebase subscription error:', error);
-        startPolling(contestId);
-    }
+    console.log('Starting polling for contest updates');
+    startPolling(contestId);
 }
 
 // Update real-time metrics
@@ -357,11 +309,17 @@ function addActivityItem(message) {
     }
 }
 
-// Fallback polling for updates
+// Polling for updates
 function startPolling(contestId) {
-    setInterval(() => {
+    // Clear existing interval
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+
+    // Poll every 10 seconds
+    pollingInterval = setInterval(() => {
         loadContestData(contestId);
-    }, 10000); // Poll every 10 seconds
+    }, 10000);
 }
 
 // Initial activity message

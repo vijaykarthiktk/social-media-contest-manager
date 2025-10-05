@@ -1,7 +1,6 @@
 const Contest = require('../models/Contest');
 const Participant = require('../models/Participant');
 const FairnessEngine = require('../utils/FairnessEngine');
-const { getFirebaseDB } = require('../config/firebase');
 
 /**
  * Contest Controller - Handles contest operations
@@ -23,19 +22,6 @@ exports.createContest = async (req, res) => {
 
         const contest = new Contest(contestData);
         await contest.save();
-
-        // Sync to Firebase for real-time updates
-        try {
-            const db = getFirebaseDB();
-            await db.ref(`contests/${contest._id}`).set({
-                title: contest.title,
-                status: contest.status,
-                currentParticipants: 0,
-                analytics: contest.analytics
-            });
-        } catch (firebaseError) {
-            console.log('Firebase sync skipped:', firebaseError.message);
-        }
 
         res.status(201).json({
             success: true,
@@ -128,18 +114,6 @@ exports.updateContest = async (req, res) => {
             });
         }
 
-        // Sync to Firebase
-        try {
-            const db = getFirebaseDB();
-            await db.ref(`contests/${contest._id}`).update({
-                status: contest.status,
-                currentParticipants: contest.currentParticipants,
-                analytics: contest.analytics
-            });
-        } catch (firebaseError) {
-            console.log('Firebase sync skipped:', firebaseError.message);
-        }
-
         res.json({
             success: true,
             message: 'Contest updated successfully',
@@ -169,14 +143,6 @@ exports.deleteContest = async (req, res) => {
 
         // Delete associated participants
         await Participant.deleteMany({ contestId: contest._id });
-
-        // Remove from Firebase
-        try {
-            const db = getFirebaseDB();
-            await db.ref(`contests/${contest._id}`).remove();
-        } catch (firebaseError) {
-            console.log('Firebase sync skipped:', firebaseError.message);
-        }
 
         res.json({
             success: true,
@@ -289,21 +255,6 @@ exports.selectWinners = async (req, res) => {
             winners,
             algorithm || contest.fairnessAlgorithm
         );
-
-        // Sync to Firebase
-        try {
-            const db = getFirebaseDB();
-            await db.ref(`contests/${contest._id}/winners`).set(
-                winners.map(w => ({
-                    id: w._id.toString(),
-                    name: w.name,
-                    email: w.email,
-                    selectedAt: new Date().toISOString()
-                }))
-            );
-        } catch (firebaseError) {
-            console.log('Firebase sync skipped:', firebaseError.message);
-        }
 
         res.json({
             success: true,

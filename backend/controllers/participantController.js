@@ -2,7 +2,6 @@ const Participant = require('../models/Participant');
 const Contest = require('../models/Contest');
 const HashUtils = require('../utils/HashUtils');
 const PriorityQueue = require('../utils/PriorityQueue');
-const { getFirebaseDB } = require('../config/firebase');
 
 /**
  * Participant Controller - Handles participant registration and management
@@ -117,24 +116,6 @@ exports.registerParticipant = async (req, res) => {
             contest.analytics.fraudAttempts += 1;
         }
         await contest.save();
-
-        // Sync to Firebase for real-time updates
-        try {
-            const db = getFirebaseDB();
-            await db.ref(`contests/${contestId}/participants`).push({
-                id: participant._id.toString(),
-                name: participant.name,
-                stage: participant.stage,
-                registeredAt: participant.registrationDate.toISOString()
-            });
-
-            // Update live count
-            await db.ref(`contests/${contestId}/currentParticipants`).set(
-                contest.currentParticipants
-            );
-        } catch (firebaseError) {
-            console.log('Firebase sync skipped:', firebaseError.message);
-        }
 
         res.status(201).json({
             success: true,

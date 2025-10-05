@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const participantController = require('../controllers/participantController');
-const { protect, authorize, optionalAuth } = require('../middleware/auth');
+const { protect, optionalAuth } = require('../middleware/auth');
 
 // Participant routes
 router.post('/register', participantController.registerParticipant);
-router.get('/', protect, authorize('admin', 'moderator'), participantController.getParticipants);
-router.get('/:id', protect, authorize('admin', 'moderator'), participantController.getParticipantById);
+router.get('/', protect, participantController.getParticipants);
+router.get('/:id', protect, participantController.getParticipantById);
 
-// Workflow management (admin and moderator only)
-router.put('/:id/stage', protect, authorize('admin', 'moderator'), participantController.updateParticipantStage);
-router.post('/bulk-qualify', protect, authorize('admin'), participantController.bulkQualifyParticipants);
+// Workflow management
+router.put('/:id/stage', protect, participantController.updateParticipantStage);
+router.post('/bulk-qualify', protect, participantController.bulkQualifyParticipants);
 
-// Engagement (admin and moderator only)
-router.put('/:id/engagement', protect, authorize('admin', 'moderator'), participantController.updateEngagement);
+// Engagement
+router.put('/:id/engagement', protect, participantController.updateEngagement);
 
 // Duplicate check
 router.post('/check-duplicate', participantController.checkDuplicate);

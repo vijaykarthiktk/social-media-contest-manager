@@ -88,12 +88,6 @@ JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 # Contest Configuration
 MAX_PARTICIPANTS_PER_CONTEST=10000
 DEFAULT_NUMBER_OF_WINNERS=3
-
-# Firebase Configuration (Optional - leave empty if not using)
-FIREBASE_PROJECT_ID=
-FIREBASE_PRIVATE_KEY=
-FIREBASE_CLIENT_EMAIL=
-FIREBASE_DATABASE_URL=
 EOF
         print_success ".env file created with default values"
     fi
