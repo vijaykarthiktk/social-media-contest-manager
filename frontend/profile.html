@@ -4,167 +4,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Profile - Social Media Contest Manager</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>My Profile - Contest Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/sidebar.css">
 </head>
 
 <body>
-    <div class="container">
-        <header>
-            <h1>👤 My Profile</h1>
-            <p class="subtitle">Manage your contests and account</p>
-            <nav>
-                <a href="index.html">Register</a> |
-                <a href="dashboard.html">Dashboard</a> |
-                <a href="profile.html" class="active">Profile</a>
-            </nav>
-        </header>
-
-        <main>
-            <!-- Create Contest -->
-            <section class="card">
-                <h2>➕ Create New Contest</h2>
-                <form id="createContestForm">
-                    <div class="form-group">
-                        <label for="contestTitle">Contest Title *</label>
-                        <input type="text" id="contestTitle" required>
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-trophy"></i>
+                <span>Contest Pro</span>
+            </div>
+            <button class="toggle-btn desktop-only" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        <nav class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-title">Main</div>
+                <a href="index.html" class="menu-item"><i class="fas fa-home"></i><span>Home</span></a>
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                <a href="profile.html" class="menu-item active"><i class="fas fa-user-circle"></i><span>My
+                        Profile</span></a>
+            </div>
+            <div class="menu-section">
+                <div class="menu-title">Quick Actions</div>
+                <a href="#" class="menu-item" onclick="switchTab('create'); return false;"><i
+                        class="fas fa-plus-circle"></i><span>New Contest</span></a>
+                <a href="#" class="menu-item" onclick="switchTab('contests'); return false;"><i
+                        class="fas fa-trophy"></i><span>My Contests</span></a>
+                <a href="#" class="menu-item" onclick="switchTab('participants'); return false;"><i
+                        class="fas fa-users"></i><span>Participants</span></a>
+            </div>
+            <div class="menu-section">
+                <div class="menu-title">Account</div>
+                <a href="#" class="menu-item" onclick="switchTab('settings'); return false;"><i
+                        class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="#" class="menu-item" onclick="logout(); return false;"><i
+                        class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-email" id="userEmail">user@example.com</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <main class="main-content">
+        <div class="top-bar">
+            <div>
+                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()"><i class="fas fa-bars"></i></button>
+                <h1 class="page-title">My Profile</h1>
+                <div class="breadcrumb">Home / Profile</div>
+            </div>
+            <div class="top-actions">
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" placeholder="Search contests..."
+                        id="searchInput"></div>
+                <button class="notification-btn"><i class="fas fa-bell"></i><span
+                        class="notification-badge"></span></button>
+            </div>
+        </div>
+        <div class="content-area">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Contests</div>
+                    <div class="stat-value" id="totalContests">0</div>
+                    <div class="stat-change"><i class="fas fa-arrow-up"></i> All time</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-label">Active Contests</div>
+                    <div class="stat-value" id="activeContests">0</div>
+                    <div class="stat-change"><i class="fas fa-play-circle"></i> Running now</div>
+                </div>
+                <div class="stat-card purple">
+                    <div class="stat-label">Total Participants</div>
+                    <div class="stat-value" id="totalParticipants">0</div>
+                    <div class="stat-change"><i class="fas fa-users"></i> Across all contests</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-label">Winners Selected</div>
+                    <div class="stat-value" id="totalWinners">0</div>
+                    <div class="stat-change"><i class="fas fa-trophy"></i> Announced</div>
+                </div>
+            </div>
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')"><i
+                        class="fas fa-dashboard"></i> Overview</button>
+                <button class="tab-btn" data-tab="contests" onclick="switchTab('contests')"><i
+                        class="fas fa-trophy"></i> My Contests</button>
+                <button class="tab-btn" data-tab="create" onclick="switchTab('create')"><i
+                        class="fas fa-plus-circle"></i> Create Contest</button>
+                <button class="tab-btn" data-tab="participants" onclick="switchTab('participants')"><i
+                        class="fas fa-users"></i> Participants</button>
+                <button class="tab-btn" data-tab="analytics" onclick="switchTab('analytics')"><i
+                        class="fas fa-chart-bar"></i> Analytics</button>
+                <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i>
+                    Settings</button>
+            </div>
+            <div class="tab-content active" id="tab-overview">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-pie"></i>Recent Activity</h2><button
+                            class="btn btn-secondary btn-sm" onclick="refreshOverview()"><i class="fas fa-sync"></i>
+                            Refresh</button>
                     </div>
-                    <div class="form-group">
-                        <label for="contestDescription">Description *</label>
-                        <textarea id="contestDescription" rows="3" required></textarea>
+                    <div id="recentActivity"></div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-contests">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-trophy"></i>My Contests</h2><button
+                            class="btn btn-primary btn-sm" onclick="switchTab('create')"><i class="fas fa-plus"></i> New
+                            Contest</button>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div class="form-group">
-                            <label for="startDate">Start Date *</label>
-                            <input type="datetime-local" id="startDate" required>
+                    <div class="contest-grid" id="contestGrid"></div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-create">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-plus-circle"></i>Create New Contest</h2>
+                    </div>
+                    <form id="createContestForm">
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label" for="contestTitle">Contest Title
+                                    *</label><input type="text" class="form-input" id="contestTitle"
+                                    placeholder="Enter contest title" required></div>
+                            <div class="form-group"><label class="form-label" for="fairnessAlgorithm">Fairness Algorithm
+                                    *</label><select class="form-select" id="fairnessAlgorithm" required>
+                                    <option value="PureRandom">Pure Random</option>
+                                    <option value="WeightedRandom">Weighted Random</option>
+                                    <option value="PriorityBased">Priority-Based</option>
+                                    <option value="TimeBased">Time-Based</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                </select></div>
+                        </div>
+                        <div class="form-group"><label class="form-label" for="contestDescription">Description
+                                *</label><textarea class="form-textarea" id="contestDescription"
+                                placeholder="Describe your contest..." required></textarea></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label" for="startDate">Start Date *</label><input
+                                    type="datetime-local" class="form-input" id="startDate" required></div>
+                            <div class="form-group"><label class="form-label" for="endDate">End Date *</label><input
+                                    type="datetime-local" class="form-input" id="endDate" required></div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label" for="maxParticipants">Max
+                                    Participants</label><input type="number" class="form-input" id="maxParticipants"
+                                    value="10000" min="1"></div>
+                            <div class="form-group"><label class="form-label" for="numberOfWinners">Number of Winners
+                                    *</label><input type="number" class="form-input" id="numberOfWinners" value="1"
+                                    min="1" required></div>
                         </div>
                         <div class="form-group">
-                            <label for="endDate">End Date *</label>
-                            <input type="datetime-local" id="endDate" required>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-rocket"></i> Create
+                                Contest</button>
+                            <button type="reset" class="btn btn-secondary" style="margin-left: 12px;"><i
+                                    class="fas fa-redo"></i> Reset</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-participants">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-users"></i>Participants Management</h2>
+                        <div style="display: flex; gap: 12px;">
+                            <select class="form-select" id="contestSelect" onchange="loadParticipants()"
+                                style="width: 250px;">
+                                <option value="">Select contest...</option>
+                            </select>
+                            <select class="form-select" id="stageFilter" onchange="loadParticipants()"
+                                style="width: 150px;">
+                                <option value="">All Stages</option>
+                                <option value="Registered">Registered</option>
+                                <option value="Qualified">Qualified</option>
+                                <option value="Finalist">Finalist</option>
+                                <option value="Winner">Winner</option>
+                            </select>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div class="form-group">
-                            <label for="maxParticipants">Max Participants</label>
-                            <input type="number" id="maxParticipants" value="10000">
-                        </div>
-                        <div class="form-group">
-                            <label for="numberOfWinners">Number of Winners *</label>
-                            <input type="number" id="numberOfWinners" value="1" min="1" required>
-                        </div>
+                    <div id="participantsTable"></div>
+                </div>
+                <div class="card" id="contestActionsCard" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-tools"></i>Contest Actions</h2>
                     </div>
-                    <div class="form-group">
-                        <label for="fairnessAlgorithm">Fairness Algorithm *</label>
-                        <select id="fairnessAlgorithm" required>
-                            <option value="PureRandom">Pure Random (Equal Probability)</option>
-                            <option value="WeightedRandom">Weighted Random (Engagement-Based)</option>
-                            <option value="PriorityBased">Priority-Based (Top Performers)</option>
-                            <option value="TimeBased">Time-Based (Stratified Sampling)</option>
-                            <option value="Hybrid">Hybrid (Balanced Approach)</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create Contest</button>
-                </form>
-            </section>
-
-            <!-- Contest Management -->
-            <section class="card">
-                <h2>📋 Contest Management</h2>
-                <select id="adminContestSelect" class="contest-selector">
-                    <option value="">Select a contest...</option>
-                </select>
-
-                <div id="contestControls" style="display: none; margin-top: 20px;">
-                    <div class="admin-controls">
-                        <div class="control-card">
-                            <h3>Contest Status</h3>
-                            <select id="contestStatus" class="contest-selector">
+                    <div class="form-grid">
+                        <div class="form-group"><label class="form-label">Contest Status</label><select
+                                class="form-select" id="contestStatus">
                                 <option value="Draft">Draft</option>
                                 <option value="Active">Active</option>
                                 <option value="Paused">Paused</option>
                                 <option value="Completed">Completed</option>
                                 <option value="Cancelled">Cancelled</option>
-                            </select>
-                            <button class="btn btn-primary mt-20" onclick="updateContestStatus()">
-                                Update Status
-                            </button>
-                        </div>
-
-                        <div class="control-card">
-                            <h3>Bulk Qualify</h3>
-                            <input type="number" id="qualifyCount" placeholder="Number to qualify"
-                                class="contest-selector">
-                            <button class="btn btn-success mt-20" onclick="bulkQualify()">
-                                Qualify Participants
-                            </button>
-                        </div>
-
-                        <div class="control-card">
-                            <h3>Select Winners</h3>
-                            <input type="number" id="winnerCount" placeholder="Number of winners"
-                                class="contest-selector">
-                            <select id="winnerAlgorithm" class="contest-selector" style="margin-top: 10px;">
+                            </select><button class="btn btn-primary btn-sm" onclick="updateContestStatus()"
+                                style="margin-top: 12px;"><i class="fas fa-save"></i> Update Status</button></div>
+                        <div class="form-group"><label class="form-label">Bulk Qualify</label><input type="number"
+                                class="form-input" id="qualifyCount" placeholder="Number to qualify"><button
+                                class="btn btn-success btn-sm" onclick="bulkQualify()" style="margin-top: 12px;"><i
+                                    class="fas fa-check-circle"></i> Qualify Participants</button></div>
+                        <div class="form-group"><label class="form-label">Select Winners</label><input type="number"
+                                class="form-input" id="winnerCount" placeholder="Number of winners"><select
+                                class="form-select" id="winnerAlgorithm" style="margin-top: 12px;">
                                 <option value="PureRandom">Pure Random</option>
                                 <option value="WeightedRandom">Weighted Random</option>
                                 <option value="PriorityBased">Priority-Based</option>
-                                <option value="TimeBased">Time-Based</option>
-                                <option value="Hybrid">Hybrid</option>
-                            </select>
-                            <button class="btn btn-warning mt-20" onclick="selectWinners()">
-                                🎉 Select Winners
-                            </button>
+                            </select><button class="btn btn-success btn-sm" onclick="selectWinners()"
+                                style="margin-top: 12px;"><i class="fas fa-trophy"></i> Select Winners</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-content" id="tab-analytics">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar"></i>Contest Analytics</h2><select
+                            class="form-select" id="analyticsContestSelect" onchange="loadAnalytics()"
+                            style="width: 250px;">
+                            <option value="">Select contest...</option>
+                        </select>
+                    </div>
+                    <div id="analyticsContainer">
+                        <div class="empty-state"><i class="fas fa-chart-pie"></i>
+                            <h3>No Contest Selected</h3>
+                            <p>Select a contest to view detailed analytics</p>
                         </div>
                     </div>
                 </div>
-            </section>
-
-            <!-- Analytics Overview -->
-            <section class="card">
-                <h2>📊 Analytics Overview</h2>
-                <div id="analyticsContainer">
-                    <p class="empty-state">Select a contest to view analytics</p>
+                <div class="card" id="fraudCard" style="display: none;">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-shield-alt"></i>Fraud Detection Report</h2><button
+                            class="btn btn-secondary btn-sm" onclick="loadFraudReport()"><i class="fas fa-sync"></i>
+                            Generate Report</button>
+                    </div>
+                    <div id="fraudReport"></div>
                 </div>
-            </section>
-
-            <!-- Participants List -->
-            <section class="card">
-                <h2>👥 Participants Management</h2>
-                <div style="margin-bottom: 20px;">
-                    <label>Filter by Stage:</label>
-                    <select id="stageFilter" class="contest-selector" onchange="loadParticipants()">
-                        <option value="">All Stages</option>
-                        <option value="Registered">Registered</option>
-                        <option value="Qualified">Qualified</option>
-                        <option value="Finalist">Finalist</option>
-                        <option value="Winner">Winner</option>
-                        <option value="Disqualified">Disqualified</option>
-                    </select>
+            </div>
+            <div class="tab-content" id="tab-settings">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-user-cog"></i>Account Settings</h2>
+                    </div>
+                    <form id="settingsForm">
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">Full Name</label><input type="text"
+                                    class="form-input" id="settingsName" placeholder="Enter your name"></div>
+                            <div class="form-group"><label class="form-label">Email Address</label><input type="email"
+                                    class="form-input" id="settingsEmail" placeholder="your@email.com" readonly></div>
+                        </div>
+                        <div class="form-group"><button type="submit" class="btn btn-primary"><i
+                                    class="fas fa-save"></i> Save Changes</button></div>
+                    </form>
                 </div>
-                <div id="participantsTable"></div>
-            </section>
-
-            <!-- Fraud Detection Report -->
-            <section class="card">
-                <h2>🛡️ Fraud Detection Report</h2>
-                <button class="btn btn-primary mb-20" onclick="loadFraudReport()">
-                    Generate Fraud Report
-                </button>
-                <div id="fraudReport"></div>
-            </section>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 Social Media Contest Manager | Fair & Transparent</p>
-        </footer>
-    </div>
-
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-key"></i>Change Password</h2>
+                    </div>
+                    <form id="passwordForm">
+                        <div class="form-group"><label class="form-label">Current Password</label><input type="password"
+                                class="form-input" id="currentPassword"></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label class="form-label">New Password</label><input type="password"
+                                    class="form-input" id="newPassword"></div>
+                            <div class="form-group"><label class="form-label">Confirm Password</label><input
+                                    type="password" class="form-input" id="confirmPassword"></div>
+                        </div>
+                        <div class="form-group"><button type="submit" class="btn btn-primary"><i
+                                    class="fas fa-lock"></i> Update Password</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
     <script src="js/config.js"></script>
     <script src="js/auth-guard.js"></script>
-    <script>
-        // Protect profile page - require authentication
-        requireAuth();
-    </script>
+    <script>requireAuth();</script>
     <script src="js/profile.js"></script>
+    <script src="js/sidebar.js"></script>
 </body>
 
 </html>

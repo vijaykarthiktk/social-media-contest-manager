@@ -11,13 +11,31 @@ document.addEventListener('DOMContentLoaded', () => {
 // Setup event listeners
 function setupEventListeners() {
     const contestSelect = document.getElementById('dashboardContestSelect');
-    contestSelect.addEventListener('change', (e) => {
-        currentContestId = e.target.value;
-        if (currentContestId) {
-            loadContestData(currentContestId);
-            subscribeToRealtimeUpdates(currentContestId);
-        }
-    });
+    if (contestSelect) {
+        contestSelect.addEventListener('change', (e) => {
+            currentContestId = e.target.value;
+            if (currentContestId) {
+                loadDashboardData();
+            }
+        });
+    }
+}
+
+// Refresh dashboard
+function refreshDashboard() {
+    if (currentContestId) {
+        loadDashboardData();
+    } else {
+        loadContests();
+    }
+}
+
+// Load dashboard data
+function loadDashboardData() {
+    if (currentContestId) {
+        loadContestData(currentContestId);
+        subscribeToRealtimeUpdates(currentContestId);
+    }
 }
 
 // Load all contests
@@ -61,6 +79,8 @@ function populateContestSelector(contests) {
 
 // Load contest data
 async function loadContestData(contestId) {
+    const container = document.getElementById('dashboardContent');
+
     try {
         // Load contest details
         const contestResponse = await fetch(
@@ -68,19 +88,14 @@ async function loadContestData(contestId) {
         );
         const contestResult = await contestResponse.json();
 
-        if (contestResult.success) {
-            updateMetrics(contestResult.data);
-        }
-
         // Load participants
         const participantsResponse = await fetch(
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${contestId}&limit=1000`
         );
         const participantsResult = await participantsResponse.json();
 
-        if (participantsResult.success) {
-            updateStageFlow(participantsResult.data);
-            updatePlatformDistribution(participantsResult.data);
+        if (contestResult.success && participantsResult.success) {
+            renderDashboard(contestResult.data, participantsResult.data);
         }
 
         // Load analytics
@@ -91,7 +106,153 @@ async function loadContestData(contestId) {
 
     } catch (error) {
         console.error('Error loading contest data:', error);
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle" style="color: #ef4444;"></i>
+                <h3>Error Loading Data</h3>
+                <p>Please try again or select a different contest</p>
+            </div>
+        `;
     }
+}
+
+// Render dashboard layout
+function renderDashboard(contest, participants) {
+    const container = document.getElementById('dashboardContent');
+
+    // Calculate metrics
+    const qualified = participants.filter(p => p.currentStage === 'Qualified').length;
+    const finalists = participants.filter(p => p.currentStage === 'Finalist').length;
+    const winners = participants.filter(p => p.currentStage === 'Winner').length;
+    const avgEngagement = participants.length > 0
+        ? (participants.reduce((sum, p) => sum + (p.engagementScore || 0), 0) / participants.length).toFixed(1)
+        : 0;
+
+    // Stage counts
+    const stages = {
+        Registered: participants.filter(p => p.currentStage === 'Registered').length,
+        Qualified: qualified,
+        Finalist: finalists,
+        Winner: winners
+    };
+
+    // Platform distribution
+    const platforms = {};
+    participants.forEach(p => {
+        platforms[p.platform] = (platforms[p.platform] || 0) + 1;
+    });
+
+    container.innerHTML = `
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Participants</div>
+                <div class="stat-value">${contest.currentParticipants || 0}</div>
+                <div class="stat-change"><i class="fas fa-users"></i> Registered</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-label">Qualified</div>
+                <div class="stat-value">${qualified}</div>
+                <div class="stat-change"><i class="fas fa-check-circle"></i> Approved</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-label">Winners Selected</div>
+                <div class="stat-value">${winners}</div>
+                <div class="stat-change"><i class="fas fa-trophy"></i> Announced</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-label">Avg Engagement</div>
+                <div class="stat-value">${avgEngagement}</div>
+                <div class="stat-change"><i class="fas fa-star"></i> Score</div>
+            </div>
+        </div>
+        
+        <!-- Participant Flow -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-stream"></i> Participant Flow</h2>
+            </div>
+            <div class="stage-flow-container">
+                ${Object.entries(stages).map(([stage, count]) => {
+        const percentage = contest.currentParticipants > 0
+            ? ((count / contest.currentParticipants) * 100).toFixed(1)
+            : 0;
+        return `
+                        <div class="flow-stage">
+                            <div class="flow-stage-header">
+                                <span class="flow-stage-name">${stage}</span>
+                                <span class="flow-stage-count">${count}</span>
+                            </div>
+                            <div class="flow-progress-bar">
+                                <div class="flow-progress-fill" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="flow-stage-percent">${percentage}%</div>
+                        </div>
+                    `;
+    }).join('')}
+            </div>
+        </div>
+        
+        <!-- Platform Distribution -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-chart-pie"></i> Platform Distribution</h2>
+            </div>
+            <div class="platform-grid">
+                ${Object.entries(platforms).map(([platform, count]) => {
+        const percentage = ((count / participants.length) * 100).toFixed(1);
+        return `
+                        <div class="platform-item">
+                            <div class="platform-icon">${getPlatformIcon(platform)}</div>
+                            <div class="platform-info">
+                                <div class="platform-name">${platform}</div>
+                                <div class="platform-stats">
+                                    <span class="platform-count">${count} users</span>
+                                    <span class="platform-percent">${percentage}%</span>
+                                </div>
+                            </div>
+                            <div class="platform-bar">
+                                <div class="platform-bar-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+    }).join('')}
+            </div>
+        </div>
+        
+        <!-- Recent Winners -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-trophy"></i> Recent Winners</h2>
+            </div>
+            <div id="winnersList"></div>
+        </div>
+        
+        <!-- Live Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-bolt"></i> Live Activity</h2>
+                <button class="btn btn-secondary btn-sm" onclick="refreshDashboard()">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+            <div id="activityFeed"></div>
+        </div>
+    `;
+}
+
+// Get platform icon
+function getPlatformIcon(platform) {
+    const icons = {
+        'Instagram': '<i class="fab fa-instagram"></i>',
+        'Twitter': '<i class="fab fa-twitter"></i>',
+        'Facebook': '<i class="fab fa-facebook"></i>',
+        'LinkedIn': '<i class="fab fa-linkedin"></i>',
+        'TikTok': '<i class="fab fa-tiktok"></i>',
+        'YouTube': '<i class="fab fa-youtube"></i>',
+        'Other': '<i class="fas fa-globe"></i>'
+    };
+    return icons[platform] || '<i class="fas fa-share-alt"></i>';
 }
 
 // Update metrics display

@@ -4,7 +4,6 @@ let selectedContestId = null;
 document.addEventListener('DOMContentLoaded', () => {
     loadUserContests();
     setupEventListeners();
-    populateContestSelectors();
 });
 
 function setupEventListeners() {
@@ -22,131 +21,18 @@ function setupEventListeners() {
     createForm.addEventListener('submit', handleCreateContest);
 }
 
-// Load user's contests and display in grid
+// Load user's contests
 async function loadUserContests() {
     try {
         const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`);
         const result = await response.json();
 
         if (result.success) {
-            displayContestGrid(result.data);
             populateContestSelector(result.data);
         }
     } catch (error) {
         console.error('Error loading contests:', error);
     }
-}
-
-// Display contests in card grid
-function displayContestGrid(contests) {
-    const container = document.getElementById('contestGrid');
-    if (!container) return;
-
-    if (contests.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-trophy"></i>
-                <h3>No Contests Yet</h3>
-                <p>Create your first contest to get started!</p>
-                <button class="btn btn-primary" onclick="switchTab('create')">
-                    <i class="fas fa-plus"></i> Create Contest
-                </button>
-            </div>
-        `;
-        return;
-    }
-
-    let html = '';
-    contests.forEach(contest => {
-        const statusClass = contest.status === 'Active' ? 'active' :
-            contest.status === 'Completed' ? 'completed' : 'pending';
-
-        html += `
-            <div class="contest-card">
-                <div class="contest-header">
-                    <div class="contest-title">${contest.title}</div>
-                    <div class="contest-platform">Multi-Platform Contest</div>
-                </div>
-                <div class="contest-body">
-                    <div class="contest-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-users"></i>
-                            <span>${contest.currentParticipants || 0} participants</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-trophy"></i>
-                            <span>${contest.numberOfWinners || 1} winners</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-calendar"></i>
-                            <span>${new Date(contest.startDate).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-                    <span class="contest-status status-${statusClass}">${contest.status}</span>
-                    <div class="contest-actions">
-                        <button class="btn btn-primary btn-sm" onclick="viewContestDetails('${contest._id}')">
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                        <button class="btn btn-secondary btn-sm" onclick="editContest('${contest._id}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-// View contest details - switch to participants tab
-function viewContestDetails(contestId) {
-    selectedContestId = contestId;
-    const contestSelect = document.getElementById('contestSelect');
-    if (contestSelect) {
-        contestSelect.value = contestId;
-    }
-    switchTab('participants');
-    loadParticipants();
-}
-
-// Edit contest - future enhancement
-function editContest(contestId) {
-    alert('Edit functionality coming soon!');
-}
-
-// Populate all contest selectors
-function populateContestSelectors() {
-    fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`)
-        .then(response => response.json())
-        .then(result => {
-            if (result.success) {
-                // Populate participants tab selector
-                const contestSelect = document.getElementById('contestSelect');
-                if (contestSelect) {
-                    contestSelect.innerHTML = '<option value="">Select contest...</option>';
-                    result.data.forEach(contest => {
-                        const option = document.createElement('option');
-                        option.value = contest._id;
-                        option.textContent = `${contest.title} (${contest.currentParticipants || 0} participants)`;
-                        contestSelect.appendChild(option);
-                    });
-                }
-
-                // Populate analytics tab selector
-                const analyticsSelect = document.getElementById('analyticsContestSelect');
-                if (analyticsSelect) {
-                    analyticsSelect.innerHTML = '<option value="">Select contest...</option>';
-                    result.data.forEach(contest => {
-                        const option = document.createElement('option');
-                        option.value = contest._id;
-                        option.textContent = contest.title;
-                        analyticsSelect.appendChild(option);
-                    });
-                }
-            }
-        })
-        .catch(error => console.error('Error loading contests:', error));
 }
 
 function populateContestSelector(contests) {
@@ -194,9 +80,7 @@ async function handleCreateContest(e) {
         if (result.success) {
             alert('Contest created successfully! ✅');
             document.getElementById('createContestForm').reset();
-            loadUserContests();
-            populateContestSelectors();
-            switchTab('contests');
+            loadContestsForAdmin();
         } else {
             alert('Error creating contest: ' + result.message);
         }
@@ -246,8 +130,7 @@ async function updateContestStatus() {
 
         if (result.success) {
             alert('Contest status updated successfully! ✅');
-            loadUserContests();
-            populateContestSelectors();
+            loadContestsForAdmin();
         } else {
             alert('Error updating status: ' + result.message);
         }
@@ -369,27 +252,10 @@ function displayWinnerResults(data) {
 
 // Load participants
 async function loadParticipants() {
-    const contestSelect = document.getElementById('contestSelect');
-    const contestId = contestSelect ? contestSelect.value : selectedContestId;
+    if (!selectedContestId) return;
 
-    if (!contestId) {
-        const container = document.getElementById('participantsTable');
-        if (container) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-users"></i>
-                    <h3>No Contest Selected</h3>
-                    <p>Select a contest to view participants</p>
-                </div>
-            `;
-        }
-        document.getElementById('contestActionsCard').style.display = 'none';
-        return;
-    }
-
-    selectedContestId = contestId;
     const stage = document.getElementById('stageFilter').value;
-    let url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${contestId}&limit=500`;
+    let url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${selectedContestId}&limit=500`;
 
     if (stage) {
         url += `&stage=${stage}`;
@@ -401,30 +267,9 @@ async function loadParticipants() {
 
         if (result.success) {
             displayParticipantsTable(result.data);
-            // Show contest actions card
-            document.getElementById('contestActionsCard').style.display = 'block';
-            // Load contest status
-            loadContestStatus(contestId);
         }
     } catch (error) {
         console.error('Error loading participants:', error);
-    }
-}
-
-// Load contest status for actions card
-async function loadContestStatus(contestId) {
-    try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}`);
-        const result = await response.json();
-
-        if (result.success) {
-            const statusSelect = document.getElementById('contestStatus');
-            if (statusSelect) {
-                statusSelect.value = result.data.status;
-            }
-        }
-    } catch (error) {
-        console.error('Error loading contest status:', error);
     }
 }
 
@@ -481,44 +326,7 @@ function displayParticipantsTable(participants) {
     container.innerHTML = html;
 }
 
-// Load analytics for selected contest
-async function loadAnalytics() {
-    const analyticsSelect = document.getElementById('analyticsContestSelect');
-    const contestId = analyticsSelect ? analyticsSelect.value : null;
-
-    if (!contestId) {
-        const container = document.getElementById('analyticsContainer');
-        if (container) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-chart-pie"></i>
-                    <h3>No Contest Selected</h3>
-                    <p>Select a contest to view detailed analytics</p>
-                </div>
-            `;
-        }
-        document.getElementById('fraudCard').style.display = 'none';
-        return;
-    }
-
-    selectedContestId = contestId;
-
-    try {
-        const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${contestId}/analytics`
-        );
-        const result = await response.json();
-
-        if (result.success) {
-            displayAnalytics(result.data);
-            document.getElementById('fraudCard').style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Error loading analytics:', error);
-    }
-}
-
-// Load contest analytics (legacy function - still used by some parts)
+// Load contest analytics
 async function loadContestAnalytics() {
     if (!selectedContestId) return;
 
@@ -543,48 +351,30 @@ function displayAnalytics(analytics) {
     const { contest, detailed } = analytics;
 
     let html = `
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Registrations</div>
-                <div class="stat-value">${contest.totalRegistrations}</div>
-                <div class="stat-change">
-                    <i class="fas fa-users"></i> All entries
-                </div>
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">Total Registrations</div>
+                <div class="metric-value">${contest.totalRegistrations}</div>
             </div>
-            <div class="stat-card green">
-                <div class="stat-label">Qualified</div>
-                <div class="stat-value">${contest.qualifiedParticipants}</div>
-                <div class="stat-change">
-                    <i class="fas fa-check-circle"></i> Approved
-                </div>
+            <div class="metric-card">
+                <div class="metric-label">Qualified</div>
+                <div class="metric-value">${contest.qualifiedParticipants}</div>
             </div>
-            <div class="stat-card purple">
-                <div class="stat-label">Finalists</div>
-                <div class="stat-value">${contest.finalists}</div>
-                <div class="stat-change">
-                    <i class="fas fa-star"></i> Top performers
-                </div>
+            <div class="metric-card">
+                <div class="metric-label">Finalists</div>
+                <div class="metric-value">${contest.finalists}</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Fairness Score</div>
-                <div class="stat-value">${contest.fairnessScore}%</div>
-                <div class="stat-change">
-                    <i class="fas fa-balance-scale"></i> Algorithm rating
-                </div>
+            <div class="metric-card">
+                <div class="metric-label">Fairness Score</div>
+                <div class="metric-value">${contest.fairnessScore}%</div>
             </div>
-            <div class="stat-card orange">
-                <div class="stat-label">Duplicates Detected</div>
-                <div class="stat-value">${contest.duplicatesDetected}</div>
-                <div class="stat-change">
-                    <i class="fas fa-exclamation-triangle"></i> Flagged
-                </div>
+            <div class="metric-card">
+                <div class="metric-label">Duplicates Detected</div>
+                <div class="metric-value" style="color: #f59e0b;">${contest.duplicatesDetected}</div>
             </div>
-            <div class="stat-card" style="border-left-color: #ef4444;">
-                <div class="stat-label">Fraud Attempts</div>
-                <div class="stat-value">${contest.fraudAttempts}</div>
-                <div class="stat-change" style="color: #ef4444;">
-                    <i class="fas fa-shield-alt"></i> Blocked
-                </div>
+            <div class="metric-card">
+                <div class="metric-label">Fraud Attempts</div>
+                <div class="metric-value" style="color: #ef4444;">${contest.fraudAttempts}</div>
             </div>
         </div>
     `;

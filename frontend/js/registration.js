@@ -1,10 +1,49 @@
 // Registration Form Handler
 let selectedContestId = null;
+let allContests = [];
+let isLoggedIn = false;
+
+// Check if user is logged in
+function checkAuth() {
+    const token = localStorage.getItem('token');
+    isLoggedIn = !!token;
+
+    // Show/hide sidebar based on auth
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const publicHero = document.getElementById('publicHero');
+    const loginBtn = document.getElementById('loginBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+
+    if (isLoggedIn) {
+        sidebar.style.display = 'flex';
+        mainContent.style.marginLeft = '260px';
+        publicHero.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (refreshBtn) refreshBtn.style.display = 'block';
+        if (mobileMenuBtn) mobileMenuBtn.style.display = 'flex';
+
+        // Load user info in sidebar
+        if (typeof loadUserInfo === 'function') {
+            loadUserInfo();
+        }
+    } else {
+        sidebar.style.display = 'none';
+        mainContent.style.marginLeft = '0';
+        publicHero.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'flex';
+        if (refreshBtn) refreshBtn.style.display = 'none';
+        if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
+    }
+}
 
 // Load active contests on page load
 document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
     loadActiveContests();
     setupFormHandlers();
+    setupSearch();
 });
 
 // Load active contests
@@ -14,43 +53,116 @@ async function loadActiveContests() {
         const result = await response.json();
 
         if (result.success && result.data.length > 0) {
+            allContests = result.data;
             displayContests(result.data);
         } else {
-            document.getElementById('contestsList').innerHTML =
-                '<p class="empty-state">No active contests available at the moment.</p>';
+            document.getElementById('contestGrid').innerHTML = '';
+            document.getElementById('noContestsMessage').style.display = 'flex';
         }
     } catch (error) {
         console.error('Error loading contests:', error);
-        document.getElementById('contestsList').innerHTML =
-            '<p class="error">Error loading contests. Please try again later.</p>';
+        document.getElementById('contestGrid').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Error loading contests. Please try again later.</p>
+            </div>
+        `;
     }
+}
+
+// Refresh contests
+function refreshContests() {
+    loadActiveContests();
 }
 
 // Display contests
 function displayContests(contests) {
-    const contestsList = document.getElementById('contestsList');
-    contestsList.innerHTML = '';
+    const contestGrid = document.getElementById('contestGrid');
+
+    if (contests.length === 0) {
+        contestGrid.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No Active Contests</h3>
+                <p>There are no active contests available at the moment. Please check back later!</p>
+            </div>
+        `;
+        return;
+    }
+
+    contestGrid.innerHTML = '';
 
     contests.forEach(contest => {
+        const spotsLeft = contest.maxParticipants - (contest.currentParticipants || 0);
+        const endDate = new Date(contest.endDate);
+        const startDate = new Date(contest.startDate);
+        const isExpiringSoon = (endDate - new Date()) < 7 * 24 * 60 * 60 * 1000; // 7 days
+        const isActive = contest.status === 'Active';
+
         const contestCard = document.createElement('div');
         contestCard.className = 'contest-card';
         contestCard.innerHTML = `
-            <span class="contest-status active">${contest.status}</span>
-            <h3>${contest.title}</h3>
-            <p>${contest.description}</p>
-            <p><strong>Participants:</strong> ${contest.currentParticipants} / ${contest.maxParticipants}</p>
-            <p><strong>End Date:</strong> ${new Date(contest.endDate).toLocaleDateString()}</p>
+            <div class="contest-header">
+                <div class="contest-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <span class="contest-badge ${isActive ? 'badge-success' : 'badge-secondary'}">
+                    ${contest.status}
+                </span>
+            </div>
+            <div class="contest-body">
+                <h3 class="contest-title">${contest.title}</h3>
+                <p class="contest-description">${contest.description || 'Join this exciting contest and showcase your talent!'}</p>
+                <div class="contest-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-users"></i>
+                        <span>${contest.currentParticipants || 0} / ${contest.maxParticipants}</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>${endDate.toLocaleDateString()}</span>
+                    </div>
+                    ${isExpiringSoon ? '<div class="meta-item warning"><i class="fas fa-clock"></i><span>Ending Soon</span></div>' : ''}
+                </div>
+                <div class="contest-footer">
+                    <div class="spots-indicator" style="color: ${spotsLeft < 10 ? '#ef4444' : '#10b981'};">
+                        <i class="fas fa-chair"></i>
+                        <strong>${spotsLeft}</strong> spots left
+                    </div>
+                </div>
+            </div>
         `;
 
-        contestCard.addEventListener('click', () => selectContest(contest, contestCard));
-        contestsList.appendChild(contestCard);
+        if (isActive && spotsLeft > 0) {
+            contestCard.style.cursor = 'pointer';
+            contestCard.addEventListener('click', () => selectContest(contest, contestCard));
+            contestCard.addEventListener('mouseenter', () => {
+                contestCard.style.transform = 'translateY(-4px)';
+                contestCard.style.boxShadow = '0 8px 16px rgba(59, 130, 246, 0.15)';
+            });
+            contestCard.addEventListener('mouseleave', () => {
+                contestCard.style.transform = 'translateY(0)';
+                contestCard.style.boxShadow = '';
+            });
+        } else {
+            contestCard.style.opacity = '0.6';
+            contestCard.style.cursor = 'not-allowed';
+        }
+
+        contestGrid.appendChild(contestCard);
     });
 }
 
 // Select contest
 function selectContest(contest, cardElement) {
+    if (!isLoggedIn) {
+        alert('Please login to register for contests');
+        window.location.href = 'login.html';
+        return;
+    }
+
     // Remove previous selection
-    document.querySelectorAll('.contest-card').forEach(card => {
+    document.querySelectorAll('.contest-selection-card').forEach(card => {
         card.classList.remove('selected');
     });
 
@@ -59,90 +171,110 @@ function selectContest(contest, cardElement) {
     selectedContestId = contest._id;
 
     // Show registration form
-    document.getElementById('registrationSection').style.display = 'block';
-    document.getElementById('selectedContestInfo').textContent =
-        `You are registering for: ${contest.title}`;
+    document.getElementById('registrationForm').style.display = 'block';
+    document.getElementById('selectedContestName').textContent = `Registration for: ${contest.title}`;
+    document.getElementById('successMessage').style.display = 'none';
 
     // Scroll to form
-    document.getElementById('registrationSection').scrollIntoView({
+    document.getElementById('registrationForm').scrollIntoView({
         behavior: 'smooth'
     });
 }
 
+// Cancel registration
+function cancelRegistration() {
+    document.getElementById('registrationForm').style.display = 'none';
+    document.getElementById('participantForm').reset();
+    selectedContestId = null;
+
+    // Remove selection
+    document.querySelectorAll('.contest-selection-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+}
+
+// Register another
+function registerAnother() {
+    document.getElementById('successMessage').style.display = 'none';
+    document.getElementById('participantForm').reset();
+    selectedContestId = null;
+
+    // Remove selection
+    document.querySelectorAll('.contest-selection-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Setup form handlers
 function setupFormHandlers() {
-    const form = document.getElementById('registrationForm');
-    const emailInput = document.getElementById('email');
-
-    // Email duplicate check on blur
-    emailInput.addEventListener('blur', checkDuplicateEmail);
+    const form = document.getElementById('participantForm');
+    if (!form) return;
 
     // Form submission
     form.addEventListener('submit', handleFormSubmit);
 }
 
-// Check for duplicate email
-async function checkDuplicateEmail() {
-    if (!selectedContestId) return;
+// Setup search
+function setupSearch() {
+    const searchInput = document.getElementById('contestSearch');
+    if (!searchInput) return;
 
-    const email = document.getElementById('email').value;
-    const phone = document.getElementById('phone').value;
-
-    if (!email) return;
-
-    try {
-        const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}/check-duplicate`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, phone, contestId: selectedContestId })
-            }
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = allContests.filter(contest =>
+            contest.title.toLowerCase().includes(query) ||
+            (contest.description && contest.description.toLowerCase().includes(query))
         );
-
-        const result = await response.json();
-
-        if (result.isDuplicate) {
-            document.getElementById('duplicateWarning').style.display = 'block';
-            document.getElementById('submitBtn').disabled = true;
-        } else {
-            document.getElementById('duplicateWarning').style.display = 'none';
-            document.getElementById('submitBtn').disabled = false;
-        }
-    } catch (error) {
-        console.error('Error checking duplicate:', error);
-    }
+        displayContests(filtered);
+    });
 }
+
+
 
 // Handle form submission
 async function handleFormSubmit(e) {
     e.preventDefault();
 
     if (!selectedContestId) {
-        showMessage('Please select a contest first', 'error');
+        alert('Please select a contest first');
         return;
     }
 
-    const submitBtn = document.getElementById('submitBtn');
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Registering...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
     const formData = {
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
         phone: document.getElementById('phone').value,
-        socialMediaHandle: document.getElementById('socialMediaHandle').value,
+        socialMediaHandle: document.getElementById('profileUrl').value,
         platform: document.getElementById('platform').value,
-        contestId: selectedContestId,
-        referredBy: document.getElementById('referralCode').value || null
+        followerCount: parseInt(document.getElementById('followerCount').value),
+        bio: document.getElementById('bio').value,
+        contestId: selectedContestId
     };
 
     try {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(
             `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}/register`,
             {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(formData)
             }
         );
@@ -150,40 +282,33 @@ async function handleFormSubmit(e) {
         const result = await response.json();
 
         if (result.success) {
-            showMessage('Registration successful! Good luck in the contest! 🎉', 'success');
-            document.getElementById('registrationForm').reset();
+            // Hide form and show success message
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
 
-            // Redirect to dashboard after 2 seconds
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 2000);
+            // Reset form
+            form.reset();
+
+            // Scroll to success message
+            document.getElementById('successMessage').scrollIntoView({
+                behavior: 'smooth'
+            });
         } else {
-            showMessage(result.message || 'Registration failed. Please try again.', 'error');
+            alert(result.message || 'Registration failed. Please try again.');
             submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        showMessage('An error occurred. Please try again later.', 'error');
+        alert('An error occurred. Please try again later.');
         submitBtn.disabled = false;
-    } finally {
-        submitBtn.textContent = 'Register for Contest';
+        submitBtn.innerHTML = originalText;
     }
 }
 
-// Show message
-function showMessage(message, type) {
-    const messageDiv = document.getElementById('formMessage');
-    messageDiv.textContent = message;
-    messageDiv.className = `message ${type}`;
-    messageDiv.style.display = 'block';
-
-    // Scroll to message
-    messageDiv.scrollIntoView({ behavior: 'smooth' });
-
-    // Hide after 5 seconds for error messages
-    if (type === 'error') {
-        setTimeout(() => {
-            messageDiv.style.display = 'none';
-        }, 5000);
-    }
+// Logout function
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'login.html';
 }
