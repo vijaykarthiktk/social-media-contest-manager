@@ -12,6 +12,9 @@ exports.createContest = async (req, res) => {
     try {
         const contestData = req.body;
 
+        // Assign the logged-in user as the owner
+        contestData.ownerId = req.user.id;
+
         // Generate random seed for fairness
         if (!contestData.randomSeed) {
             const crypto = require('crypto');
@@ -110,6 +113,8 @@ exports.getContestById = async (req, res) => {
 // Update contest
 exports.updateContest = async (req, res) => {
     try {
+        // Contest ownership is already verified by middleware
+        // Update the contest
         const contest = await Contest.findByIdAndUpdate(
             req.params.id,
             req.body,
@@ -152,6 +157,7 @@ exports.updateContest = async (req, res) => {
 // Delete contest
 exports.deleteContest = async (req, res) => {
     try {
+        // Contest ownership is already verified by middleware
         const contest = await Contest.findByIdAndDelete(req.params.id);
 
         if (!contest) {

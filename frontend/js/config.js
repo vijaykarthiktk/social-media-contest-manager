@@ -7,8 +7,7 @@ const API_CONFIG = {
             LOGIN: '/auth/login',
             LOGOUT: '/auth/logout',
             ME: '/auth/me',
-            UPDATE_PASSWORD: '/auth/updatepassword',
-            CREATE_ADMIN: '/auth/create-admin'
+            UPDATE_PASSWORD: '/auth/updatepassword'
         },
         CONTESTS: '/contests',
         PARTICIPANTS: '/participants',

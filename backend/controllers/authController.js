@@ -12,7 +12,7 @@ const crypto = require('crypto');
 // @access  Public
 exports.register = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { name, email, password } = req.body;
 
         // Validate input
         if (!name || !email || !password) {
@@ -35,8 +35,7 @@ exports.register = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            password,
-            role: role || 'user' // Default to 'user' role
+            password
         });
 
         // Generate token
@@ -50,7 +49,6 @@ exports.register = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role,
                 isActive: user.isActive
             }
         });
@@ -140,7 +138,6 @@ exports.login = async (req, res) => {
                 id: user._id,
                 name: user.name,
                 email: user.email,
-                role: user.role,
                 isActive: user.isActive,
                 lastLogin: user.lastLogin
             }
@@ -254,51 +251,4 @@ exports.updatePassword = async (req, res) => {
     }
 };
 
-// @desc    Create admin user (for initial setup)
-// @route   POST /api/auth/create-admin
-// @access  Public (should be disabled in production or protected)
-exports.createAdmin = async (req, res) => {
-    try {
-        const { name, email, password } = req.body;
 
-        // Check if admin already exists
-        const existingAdmin = await User.findOne({ role: 'admin' });
-        if (existingAdmin) {
-            return res.status(400).json({
-                success: false,
-                message: 'Admin user already exists'
-            });
-        }
-
-        // Create admin user
-        const admin = await User.create({
-            name: name || 'Admin',
-            email: email || 'admin@example.com',
-            password: password || 'admin123',
-            role: 'admin',
-            isEmailVerified: true
-        });
-
-        const token = generateToken(admin._id);
-
-        res.status(201).json({
-            success: true,
-            message: 'Admin user created successfully',
-            token,
-            user: {
-                id: admin._id,
-                name: admin.name,
-                email: admin.email,
-                role: admin.role
-            }
-        });
-
-    } catch (error) {
-        console.error('Create admin error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error creating admin user',
-            error: error.message
-        });
-    }
-};

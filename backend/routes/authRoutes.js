@@ -5,15 +5,13 @@ const {
     login,
     getMe,
     logout,
-    updatePassword,
-    createAdmin
+    updatePassword
 } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
-router.post('/create-admin', createAdmin); // Should be disabled in production
 
 // Protected routes (require authentication)
 router.get('/me', protect, getMe);

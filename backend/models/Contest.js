@@ -149,6 +149,13 @@ const contestSchema = new mongoose.Schema({
         }
     },
 
+    // Ownership
+    ownerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+
     // Metadata
     createdBy: {
         type: String

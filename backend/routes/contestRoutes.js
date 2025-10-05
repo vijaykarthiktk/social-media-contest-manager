@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const contestController = require('../controllers/contestController');
+const { protect, isContestOwner, optionalAuth } = require('../middleware/auth');
 
 // Contest CRUD routes
-router.post('/', contestController.createContest);
-router.get('/', contestController.getAllContests);
-router.get('/:id', contestController.getContestById);
-router.put('/:id', contestController.updateContest);
-router.delete('/:id', contestController.deleteContest);
+router.post('/', protect, contestController.createContest);
+router.get('/', optionalAuth, contestController.getAllContests);
+router.get('/:id', optionalAuth, contestController.getContestById);
+router.put('/:id', protect, isContestOwner, contestController.updateContest);
+router.delete('/:id', protect, isContestOwner, contestController.deleteContest);
 
-// Winner selection
-router.post('/:id/select-winners', contestController.selectWinners);
+// Winner selection (contest owner only)
+router.post('/:id/select-winners', protect, isContestOwner, contestController.selectWinners);
 
-// Analytics
-router.get('/:id/analytics', contestController.getContestAnalytics);
+// Analytics (contest owner only)
+router.get('/:id/analytics', protect, isContestOwner, contestController.getContestAnalytics);
 
 module.exports = router;

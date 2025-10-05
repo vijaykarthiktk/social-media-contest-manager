@@ -87,25 +87,47 @@ exports.protect = async (req, res, next) => {
     }
 };
 
-// Middleware to restrict access to specific roles
-exports.authorize = (...roles) => {
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({
+// Middleware to check if user is the owner of a contest
+exports.isContestOwner = async (req, res, next) => {
+    try {
+        const Contest = require('../models/Contest');
+        const contestId = req.params.id;
+
+        if (!contestId) {
+            return res.status(400).json({
                 success: false,
-                message: 'Not authorized to access this route.'
+                message: 'Contest ID is required'
             });
         }
 
-        if (!roles.includes(req.user.role)) {
+        const contest = await Contest.findById(contestId);
+
+        if (!contest) {
+            return res.status(404).json({
+                success: false,
+                message: 'Contest not found'
+            });
+        }
+
+        // Check if the logged-in user is the owner of the contest
+        if (contest.ownerId.toString() !== req.user.id.toString()) {
             return res.status(403).json({
                 success: false,
-                message: `Role '${req.user.role}' is not authorized to access this route.`
+                message: 'You are not authorized to access this contest. Only the contest owner can perform this action.'
             });
         }
 
+        // Attach contest to request for use in controller
+        req.contest = contest;
         next();
-    };
+
+    } catch (error) {
+        console.error('Contest ownership check error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error checking contest ownership'
+        });
+    }
 };
 
 // Optional authentication (doesn't fail if no token)

@@ -24,11 +24,6 @@ const userSchema = new mongoose.Schema({
         required: [true, 'Name is required'],
         trim: true
     },
-    role: {
-        type: String,
-        enum: ['admin', 'user', 'moderator'],
-        default: 'user'
-    },
 
     // Account Status
     isActive: {
@@ -64,7 +59,6 @@ const userSchema = new mongoose.Schema({
 
 // Indexes
 userSchema.index({ email: 1 });
-userSchema.index({ role: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

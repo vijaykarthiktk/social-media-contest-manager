@@ -63,7 +63,6 @@ function clearAllErrors() {
     clearFieldError('email');
     clearFieldError('password');
     clearFieldError('confirmPassword');
-    clearFieldError('role');
 }
 
 // Validate email format
@@ -93,7 +92,6 @@ registerForm.addEventListener('submit', async (e) => {
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
-    const role = document.getElementById('role').value;
 
     // Validation
     let hasError = false;
@@ -140,7 +138,7 @@ registerForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, email, password, role })
+            body: JSON.stringify({ name, email, password })
         });
 
         const data = await response.json();
@@ -161,13 +159,9 @@ registerForm.addEventListener('submit', async (e) => {
                 localStorage.setItem('user', JSON.stringify(data.user));
             }
 
-            // Redirect to login or dashboard
+            // Redirect to dashboard
             setTimeout(() => {
-                if (data.user.role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
+                window.location.href = 'dashboard.html';
             }, 1500);
         } else {
             throw new Error('Invalid response from server');
@@ -204,13 +198,8 @@ function checkExistingAuth() {
     const user = localStorage.getItem('user');
 
     if (token && user) {
-        // Redirect to appropriate page
-        const userData = JSON.parse(user);
-        if (userData.role === 'admin') {
-            window.location.href = 'admin.html';
-        } else {
-            window.location.href = 'dashboard.html';
-        }
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
     }
 }
 

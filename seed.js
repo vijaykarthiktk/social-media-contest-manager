@@ -2,6 +2,7 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const Contest = require('./backend/models/Contest');
 const Participant = require('./backend/models/Participant');
+const User = require('./backend/models/User');
 const HashUtils = require('./backend/utils/HashUtils');
 
 // Sample data
@@ -23,8 +24,22 @@ async function connectDB() {
     }
 }
 
+// Create a sample user
+async function createSampleUser() {
+    console.log('\n👤 Creating sample user...');
+
+    const sampleUser = await User.create({
+        name: 'Sample User',
+        email: 'user@example.com',
+        password: 'password123'
+    });
+
+    console.log(`✅ Created sample user: ${sampleUser.email}`);
+    return sampleUser;
+}
+
 // Generate sample contests
-async function generateContests() {
+async function generateContests(ownerId) {
     console.log('\n📋 Generating sample contests...');
 
     const contests = [
@@ -41,6 +56,7 @@ async function generateContests() {
             campaignId: 'SUMMER2025',
             duplicateCheckEnabled: true,
             fraudDetectionEnabled: true,
+            ownerId: ownerId,
             engagementWeights: {
                 referrals: 10,
                 socialShares: 5,
@@ -60,7 +76,8 @@ async function generateContests() {
             platforms: ['Twitter', 'LinkedIn', 'YouTube'],
             campaignId: 'TECHLAUNCH',
             duplicateCheckEnabled: true,
-            fraudDetectionEnabled: true
+            fraudDetectionEnabled: true,
+            ownerId: ownerId
         },
         {
             title: 'Influencer Collaboration Contest',
@@ -74,7 +91,8 @@ async function generateContests() {
             platforms: ['Instagram', 'TikTok', 'YouTube'],
             campaignId: 'INFLUENCER2025',
             duplicateCheckEnabled: true,
-            fraudDetectionEnabled: true
+            fraudDetectionEnabled: true,
+            ownerId: ownerId
         }
     ];
 
@@ -162,10 +180,12 @@ async function seedDatabase() {
         console.log('🧹 Clearing existing data...');
         await Contest.deleteMany({});
         await Participant.deleteMany({});
+        await User.deleteMany({});
         console.log('✅ Database cleared\n');
 
         // Generate new data
-        const contests = await generateContests();
+        const sampleUser = await createSampleUser();
+        const contests = await generateContests(sampleUser._id);
         await generateParticipants(contests, 150);
 
         console.log('\n✨ Database seeding completed successfully!');
@@ -176,9 +196,9 @@ async function seedDatabase() {
 
         console.log('\n🚀 You can now:');
         console.log('   1. Start the server: npm start');
-        console.log('   2. Open frontend/index.html in a browser');
-        console.log('   3. View the dashboard at frontend/dashboard.html');
-        console.log('   4. Access admin panel at frontend/admin.html\n');
+        console.log('   2. Login with: user@example.com / password123');
+        console.log('   3. Open frontend/index.html in a browser');
+        console.log('   4. View the dashboard at frontend/dashboard.html\n');
 
         process.exit(0);
     } catch (error) {

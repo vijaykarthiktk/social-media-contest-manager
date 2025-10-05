@@ -144,13 +144,9 @@ loginForm.addEventListener('submit', async (e) => {
                 localStorage.setItem('user', JSON.stringify(data.user));
             }
 
-            // Redirect based on role
+            // Redirect to dashboard
             setTimeout(() => {
-                if (data.user.role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
+                window.location.href = 'dashboard.html';
             }, 1000);
         } else {
             throw new Error('Invalid response from server');
@@ -169,13 +165,8 @@ function checkExistingAuth() {
     const user = localStorage.getItem('user');
 
     if (token && user) {
-        // Redirect to appropriate page
-        const userData = JSON.parse(user);
-        if (userData.role === 'admin') {
-            window.location.href = 'admin.html';
-        } else {
-            window.location.href = 'dashboard.html';
-        }
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
     }
 }
 
@@ -189,5 +180,5 @@ checkExistingAuth();
 // Handle forgot password
 document.querySelector('.forgot-password').addEventListener('click', (e) => {
     e.preventDefault();
-    alert('Password reset feature coming soon!\n\nFor now, contact an administrator to reset your password.');
+    alert('Password reset feature coming soon!');
 });
