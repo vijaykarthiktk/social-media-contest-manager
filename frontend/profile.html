@@ -4,19 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Social Media Contest Manager</title>
+    <title>My Profile - Social Media Contest Manager</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
     <div class="container">
         <header>
-            <h1>⚙️ Admin Control Panel</h1>
-            <p class="subtitle">Manage contests and select winners</p>
+            <h1>👤 My Profile</h1>
+            <p class="subtitle">Manage your contests and account</p>
             <nav>
                 <a href="index.html">Register</a> |
                 <a href="dashboard.html">Dashboard</a> |
-                <a href="admin.html" class="active">Admin</a>
+                <a href="profile.html" class="active">Profile</a>
             </nav>
         </header>
 
@@ -161,10 +161,10 @@
     <script src="js/config.js"></script>
     <script src="js/auth-guard.js"></script>
     <script>
-        // Protect admin page - require admin role
-        requireAdmin();
+        // Protect profile page - require authentication
+        requireAuth();
     </script>
-    <script src="js/admin.js"></script>
+    <script src="js/profile.js"></script>
 </body>
 
 </html>

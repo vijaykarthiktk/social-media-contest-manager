@@ -1,16 +1,16 @@
-// Admin Panel JavaScript
-let selectedAdminContestId = null;
+// Profile Page JavaScript
+let selectedContestId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadContestsForAdmin();
-    setupAdminEventListeners();
+    loadUserContests();
+    setupEventListeners();
 });
 
-function setupAdminEventListeners() {
+function setupEventListeners() {
     const contestSelect = document.getElementById('adminContestSelect');
     contestSelect.addEventListener('change', (e) => {
-        selectedAdminContestId = e.target.value;
-        if (selectedAdminContestId) {
+        selectedContestId = e.target.value;
+        if (selectedContestId) {
             loadContestDetails();
             loadParticipants();
             loadContestAnalytics();
@@ -21,21 +21,21 @@ function setupAdminEventListeners() {
     createForm.addEventListener('submit', handleCreateContest);
 }
 
-// Load contests for admin
-async function loadContestsForAdmin() {
+// Load user's contests
+async function loadUserContests() {
     try {
         const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}?limit=100`);
         const result = await response.json();
 
         if (result.success) {
-            populateAdminContestSelector(result.data);
+            populateContestSelector(result.data);
         }
     } catch (error) {
         console.error('Error loading contests:', error);
     }
 }
 
-function populateAdminContestSelector(contests) {
+function populateContestSelector(contests) {
     const select = document.getElementById('adminContestSelect');
     select.innerHTML = '<option value="">Select a contest...</option>';
 
@@ -94,7 +94,7 @@ async function handleCreateContest(e) {
 async function loadContestDetails() {
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedAdminContestId}`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}`
         );
         const result = await response.json();
 
@@ -109,7 +109,7 @@ async function loadContestDetails() {
 
 // Update contest status
 async function updateContestStatus() {
-    if (!selectedAdminContestId) {
+    if (!selectedContestId) {
         alert('Please select a contest first');
         return;
     }
@@ -118,7 +118,7 @@ async function updateContestStatus() {
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedAdminContestId}`,
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}`,
             {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -142,7 +142,7 @@ async function updateContestStatus() {
 
 // Bulk qualify participants
 async function bulkQualify() {
-    if (!selectedAdminContestId) {
+    if (!selectedContestId) {
         alert('Please select a contest first');
         return;
     }
@@ -164,7 +164,7 @@ async function bulkQualify() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contestId: selectedAdminContestId,
+                    contestId: selectedContestId,
                     count: count
                 })
             }
@@ -187,7 +187,7 @@ async function bulkQualify() {
 
 // Select winners
 async function selectWinners() {
-    if (!selectedAdminContestId) {
+    if (!selectedContestId) {
         alert('Please select a contest first');
         return;
     }
@@ -206,7 +206,7 @@ async function selectWinners() {
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedAdminContestId}/select-winners`,
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}/select-winners`,
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -252,10 +252,10 @@ function displayWinnerResults(data) {
 
 // Load participants
 async function loadParticipants() {
-    if (!selectedAdminContestId) return;
+    if (!selectedContestId) return;
 
     const stage = document.getElementById('stageFilter').value;
-    let url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${selectedAdminContestId}&limit=500`;
+    let url = `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}?contestId=${selectedContestId}&limit=500`;
 
     if (stage) {
         url += `&stage=${stage}`;
@@ -328,11 +328,11 @@ function displayParticipantsTable(participants) {
 
 // Load contest analytics
 async function loadContestAnalytics() {
-    if (!selectedAdminContestId) return;
+    if (!selectedContestId) return;
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedAdminContestId}/analytics`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTESTS}/${selectedContestId}/analytics`
         );
         const result = await response.json();
 
@@ -384,14 +384,14 @@ function displayAnalytics(analytics) {
 
 // Load fraud report
 async function loadFraudReport() {
-    if (!selectedAdminContestId) {
+    if (!selectedContestId) {
         alert('Please select a contest first');
         return;
     }
 
     try {
         const response = await fetch(
-            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ANALYTICS}/fraud?contestId=${selectedAdminContestId}`
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ANALYTICS}/fraud?contestId=${selectedContestId}`
         );
         const result = await response.json();
 
