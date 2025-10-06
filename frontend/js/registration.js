@@ -264,13 +264,18 @@ async function openRegistrationModal(contest) {
     document.getElementById('registrationModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    // Pre-fill name and email if available
+    // Pre-fill name and email if available and keep them disabled
+    const nameField = document.getElementById('name');
+    const emailField = document.getElementById('email');
+
     if (currentUser) {
         if (currentUser.name) {
-            document.getElementById('name').value = currentUser.name;
+            nameField.value = currentUser.name;
+            nameField.disabled = true;
         }
         if (currentUser.email) {
-            document.getElementById('email').value = currentUser.email;
+            emailField.value = currentUser.email;
+            emailField.disabled = true;
         }
     }
 }
