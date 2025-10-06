@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Contest Manager</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/sidebar.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pricing.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar" style="display: none;">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-trophy"></i>
+                <span>Contest Pro</span>
+            </div>
+            <button class="toggle-btn desktop-only" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <nav class="sidebar-menu">
+            <div class="menu-section">
+                <div class="menu-title">Main</div>
+                <a href="index.html" class="menu-item"><i class="fas fa-home"></i><span>Home</span></a>
+                <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+                <a href="profile.html" class="menu-item"><i class="fas fa-user-circle"></i><span>My Profile</span></a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Quick Actions</div>
+                <a href="profile.html#create" class="menu-item"><i class="fas fa-plus-circle"></i><span>New
+                        Contest</span></a>
+                <a href="profile.html#contests" class="menu-item"><i class="fas fa-trophy"></i><span>My
+                        Contests</span></a>
+                <a href="profile.html#participants" class="menu-item"><i
+                        class="fas fa-users"></i><span>Participants</span></a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Account</div>
+                <a href="pricing.html" class="menu-item active"><i class="fas fa-tags"></i><span>Pricing</span></a>
+                <a href="profile.html#settings" class="menu-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="#" class="menu-item" onclick="logout(); return false;"><i
+                        class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">U</div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-email" id="userEmail">user@example.com</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Public Navigation Header -->
+    <header class="public-header" id="publicHeader">
+        <div class="header-container">
+            <div class="logo-area">
+                <i class="fas fa-trophy"></i>
+                <span class="logo-text">Contest Hub</span>
+            </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="pricing.html" class="nav-link">Pricing</a>
+                <a href="login.html" class="nav-link">Login</a>
+                <a href="register.html" class="nav-link nav-link-primary">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent" style="margin-left: 0; transition: margin-left 0.3s ease;">
+        <!-- Pricing Hero -->
+        <section class="pricing-hero">
+            <div class="pricing-hero-content">
+                <h1 class="pricing-hero-title">Simple, Transparent Pricing</h1>
+                <p class="pricing-hero-subtitle">Choose the perfect plan for your contest management needs</p>
+
+                <!-- Billing Toggle -->
+                <div class="billing-toggle">
+                    <span class="billing-label" id="monthlyLabel">Monthly</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="billingToggle" onchange="toggleBilling()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="billing-label" id="annualLabel">
+                        Annual
+                        <span class="save-badge">Save 20%</span>
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Cards -->
+        <section class="pricing-section">
+            <div class="pricing-container pricing-container-two">
+                <!-- Pro Plan - Featured -->
+                <div class="pricing-card featured">
+                    <div class="featured-badge">
+                        <i class="fas fa-star"></i> Most Popular
+                    </div>
+                    <div class="pricing-card-header">
+                        <div class="plan-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h3 class="plan-name">Pro</h3>
+                        <p class="plan-description">Perfect for businesses & content creators</p>
+                    </div>
+
+                    <div class="pricing-card-price">
+                        <span class="price-currency">$</span>
+                        <span class="price-amount monthly-price">49</span>
+                        <span class="price-amount annual-price" style="display: none;">39</span>
+                        <span class="price-period monthly-period">/month</span>
+                        <span class="price-period annual-period" style="display: none;">/month (billed annually)</span>
+                    </div>
+
+                    <ul class="pricing-features">
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Unlimited contests</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Unlimited participants</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Advanced analytics & insights</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Real-time dashboard</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>All fairness algorithms</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Priority selection engine</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Multi-stage contests</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Custom email templates</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Export data (CSV, PDF)</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>24/7 email support</span>
+                        </li>
+                    </ul>
+
+                    <button class="pricing-btn btn-primary" onclick="selectPlan('pro')">
+                        Start Pro Plan
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card">
+                    <div class="pricing-card-header">
+                        <div class="plan-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h3 class="plan-name">Enterprise</h3>
+                        <p class="plan-description">For large organizations</p>
+                    </div>
+
+                    <div class="pricing-card-price">
+                        <span class="price-currency"></span>
+                        <span class="price-amount" style="font-size: 2.5rem;">Custom</span>
+                        <span class="price-period">Contact us for pricing</span>
+                    </div>
+
+                    <ul class="pricing-features">
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span><strong>Everything in Pro, plus:</strong></span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Unlimited campaigns</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Unlimited team members</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Full API access</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>White-label solution</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Custom branding</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Advanced security features</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Dedicated account manager</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>Custom integrations</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>SLA guarantee</span>
+                        </li>
+                        <li class="feature-item">
+                            <i class="fas fa-check feature-icon"></i>
+                            <span>On-premise deployment option</span>
+                        </li>
+                    </ul>
+
+                    <button class="pricing-btn btn-outline" onclick="selectPlan('enterprise')">
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Comparison -->
+        <section class="comparison-section">
+            <div class="comparison-container">
+                <h2 class="comparison-title">Detailed Feature Comparison</h2>
+                <p class="comparison-subtitle">See exactly what's included in each plan</p>
+
+                <div class="comparison-table-wrapper">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th class="feature-column">Features</th>
+                                <th class="highlighted">Pro - $49/mo</th>
+                                <th>Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="feature-column"><strong>Contest Management</strong></td>
+                                <td class="highlighted"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Number of Contests</td>
+                                <td class="highlighted">Unlimited</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Participants per Contest</td>
+                                <td class="highlighted">Unlimited</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Contest Duration</td>
+                                <td class="highlighted">Unlimited</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Multi-stage Contests</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Campaigns</td>
+                                <td class="highlighted">Unlimited</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Team Members</td>
+                                <td class="highlighted">Up to 5</td>
+                                <td>Unlimited</td>
+                            </tr>
+
+                            <tr class="section-divider">
+                                <td class="feature-column"><strong>Analytics & Reporting</strong></td>
+                                <td class="highlighted"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Advanced Analytics Dashboard</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Real-time Analytics</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Participant Flow Tracking</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Platform Insights</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Custom Reports</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Export Data (CSV/PDF)</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+
+                            <tr class="section-divider">
+                                <td class="feature-column"><strong>Fairness Algorithms</strong></td>
+                                <td class="highlighted"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">All Fairness Algorithms</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Priority Selection Engine</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Cryptographic Hash Verification</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Transparent Selection Process</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+
+                            <tr class="section-divider">
+                                <td class="feature-column"><strong>Support & Services</strong></td>
+                                <td class="highlighted"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Email Support</td>
+                                <td class="highlighted">24/7</td>
+                                <td>24/7 Priority</td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Chat Support</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Phone Support</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Dedicated Account Manager</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">SLA Guarantee</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+
+                            <tr class="section-divider">
+                                <td class="feature-column"><strong>Customization & Integration</strong></td>
+                                <td class="highlighted"></td>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Custom Email Templates</td>
+                                <td class="highlighted"><i class="fas fa-check text-success"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Custom Branding</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">White-label Solution</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Full API Access</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">Custom Integrations</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td class="feature-column">On-premise Deployment</td>
+                                <td class="highlighted"><i class="fas fa-times text-muted"></i></td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <div class="faq-container">
+                <h2 class="faq-title">Frequently Asked Questions</h2>
+                <p class="faq-subtitle">Everything you need to know about our pricing</p>
+
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>Can I change plans later?</h3>
+                        </div>
+                        <p class="faq-answer">Yes! You can upgrade or downgrade your plan at any time. Changes will be
+                            reflected in your next billing cycle.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>Is there a free trial for Pro plans?</h3>
+                        </div>
+                        <p class="faq-answer">Yes, we offer a 14-day free trial for the Pro plan. No credit card
+                            required to start your trial.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>What payment methods do you accept?</h3>
+                        </div>
+                        <p class="faq-answer">We accept all major credit cards (Visa, Mastercard, Amex), PayPal, and
+                            bank transfers for Enterprise plans.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>Can I cancel my subscription anytime?</h3>
+                        </div>
+                        <p class="faq-answer">Yes, you can cancel your subscription at any time. Your account will
+                            remain active until the end of your billing period.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>Do you offer discounts for non-profits?</h3>
+                        </div>
+                        <p class="faq-answer">Yes! We offer special discounts for non-profit organizations and
+                            educational institutions. Contact our sales team for details.</p>
+                    </div>
+
+                    <div class="faq-item">
+                        <div class="faq-question">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>What is the Fair Selection Algorithm?</h3>
+                        </div>
+                        <p class="faq-answer">Our proprietary algorithm ensures fair and transparent participant
+                            selection using cryptographic hashing and priority queues for unbiased results.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-container">
+                <div class="cta-content">
+                    <h2 class="cta-title">Ready to Get Started?</h2>
+                    <p class="cta-subtitle">Join thousands of contest organizers using Contest Hub</p>
+                    <div class="cta-buttons">
+                        <button class="btn-cta-primary" onclick="window.location.href='register.html'">
+                            <i class="fas fa-rocket"></i> Start Free Trial
+                        </button>
+                        <button class="btn-cta-secondary" onclick="window.location.href='#comparison'">
+                            <i class="fas fa-phone"></i> Contact Sales
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Contest Hub - Fair & Transparent Contest Management</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">About</a>
+                <a href="#" class="footer-link">Terms</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="pricing.html" class="footer-link">Pricing</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script>
+        // Check if user is logged in
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (token && user) {
+                // User is logged in - show sidebar
+                document.getElementById('sidebar').style.display = 'flex';
+                document.getElementById('publicHeader').style.display = 'none';
+                document.getElementById('mainContent').style.marginLeft = '260px';
+
+                // Update sidebar user info
+                try {
+                    const userData = JSON.parse(user);
+                    const userNameEl = document.getElementById('userName');
+                    const userEmailEl = document.getElementById('userEmail');
+                    const userAvatarEl = document.getElementById('userAvatar');
+
+                    if (userNameEl && userData.name) {
+                        userNameEl.textContent = userData.name;
+                    }
+                    if (userEmailEl && userData.email) {
+                        userEmailEl.textContent = userData.email;
+                    }
+                    if (userAvatarEl && userData.name) {
+                        userAvatarEl.textContent = userData.name.charAt(0).toUpperCase();
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                }
+            } else {
+                // User is not logged in - show public header
+                document.getElementById('sidebar').style.display = 'none';
+                document.getElementById('publicHeader').style.display = 'block';
+                document.getElementById('mainContent').style.marginLeft = '0';
+            }
+        }
+
+        // Toggle billing period
+        function toggleBilling() {
+            const isAnnual = document.getElementById('billingToggle').checked;
+            const monthlyPrices = document.querySelectorAll('.monthly-price');
+            const annualPrices = document.querySelectorAll('.annual-price');
+            const monthlyPeriods = document.querySelectorAll('.monthly-period');
+            const annualPeriods = document.querySelectorAll('.annual-period');
+
+            monthlyPrices.forEach(el => el.style.display = isAnnual ? 'none' : 'inline');
+            annualPrices.forEach(el => el.style.display = isAnnual ? 'inline' : 'none');
+            monthlyPeriods.forEach(el => el.style.display = isAnnual ? 'none' : 'inline');
+            annualPeriods.forEach(el => el.style.display = isAnnual ? 'inline' : 'none');
+
+            // Update labels
+            document.getElementById('monthlyLabel').style.fontWeight = isAnnual ? '400' : '600';
+            document.getElementById('annualLabel').style.fontWeight = isAnnual ? '600' : '400';
+        }
+
+        // Select plan
+        function selectPlan(plan) {
+            const token = localStorage.getItem('token');
+
+            if (plan === 'enterprise') {
+                // For enterprise, show contact form or redirect
+                alert('Thank you for your interest in our Enterprise plan! Our sales team will contact you shortly.');
+                return;
+            }
+
+            if (!token) {
+                // Not logged in - redirect to register
+                window.location.href = 'register.html?plan=' + plan;
+            } else {
+                // Already logged in - show upgrade message
+                alert(`Upgrading to ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan! This feature will be implemented soon.`);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
+</body>
+
+</html>
