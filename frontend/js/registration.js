@@ -3,39 +3,87 @@ let selectedContestId = null;
 let allContests = [];
 let filteredContests = [];
 let isLoggedIn = false;
+let currentUser = null;
+
+// Get authentication token (check both possible keys)
+function getAuthToken() {
+    return localStorage.getItem('authToken') || localStorage.getItem('token');
+}
+
+// Get current user
+function getCurrentUser() {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+
+    try {
+        return JSON.parse(userStr);
+    } catch (error) {
+        console.error('Error parsing user data:', error);
+        return null;
+    }
+}
 
 // Check if user is logged in
 function checkAuth() {
-    const token = localStorage.getItem('token');
-    isLoggedIn = !!token;
+    const token = getAuthToken();
+    currentUser = getCurrentUser();
+    isLoggedIn = !!(token && currentUser);
 
-    // Show/hide sidebar based on auth
+    // Get elements
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('mainContent');
     const publicHero = document.getElementById('publicHero');
-    const loginBtn = document.getElementById('loginBtn');
+    const publicHeader = document.getElementById('publicHeader');
+    const welcomeSection = document.getElementById('welcomeSection');
     const refreshBtn = document.getElementById('refreshBtn');
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 
     if (isLoggedIn) {
-        sidebar.style.display = 'flex';
-        mainContent.style.marginLeft = '260px';
+        // Logged in - show sidebar and user content
+        if (sidebar) sidebar.style.display = 'flex';
+        if (mainContent) mainContent.style.marginLeft = '260px';
         if (publicHero) publicHero.style.display = 'none';
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (refreshBtn) refreshBtn.style.display = 'block';
+        if (publicHeader) publicHeader.style.display = 'none';
+        if (welcomeSection) {
+            welcomeSection.style.display = 'block';
+            const welcomeUserName = document.getElementById('welcomeUserName');
+            if (welcomeUserName) {
+                welcomeUserName.textContent = currentUser.name || 'User';
+            }
+        }
+        if (refreshBtn) refreshBtn.style.display = 'inline-flex';
         if (mobileMenuBtn) mobileMenuBtn.style.display = 'flex';
 
         // Load user info in sidebar
-        if (typeof loadUserInfo === 'function') {
-            loadUserInfo();
-        }
+        loadUserInfoInSidebar();
     } else {
-        sidebar.style.display = 'none';
-        mainContent.style.marginLeft = '0';
+        // Not logged in - show public view
+        if (sidebar) sidebar.style.display = 'none';
+        if (mainContent) mainContent.style.marginLeft = '0';
         if (publicHero) publicHero.style.display = 'block';
-        if (loginBtn) loginBtn.style.display = 'flex';
+        if (publicHeader) publicHeader.style.display = 'block';
+        if (welcomeSection) welcomeSection.style.display = 'none';
         if (refreshBtn) refreshBtn.style.display = 'none';
         if (mobileMenuBtn) mobileMenuBtn.style.display = 'none';
+    }
+}
+
+// Load user info in sidebar
+function loadUserInfoInSidebar() {
+    if (!currentUser) return;
+
+    const userAvatar = document.getElementById('userAvatar');
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+
+    if (userAvatar) {
+        userAvatar.textContent = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
+    }
+    if (userName) {
+        userName.textContent = currentUser.name || 'User';
+    }
+    if (userEmail) {
+        userEmail.textContent = currentUser.email || '';
     }
 }
 
@@ -195,9 +243,11 @@ function showNoContests() {
 
 // Open registration modal
 function openRegistrationModal(contest) {
+    // Check authentication
     if (!isLoggedIn) {
-        alert('Please login to register for contests');
-        window.location.href = 'login.html';
+        if (confirm('You need to be logged in to register for contests. Would you like to go to the login page?')) {
+            window.location.href = 'login.html';
+        }
         return;
     }
 
@@ -205,6 +255,11 @@ function openRegistrationModal(contest) {
     document.getElementById('selectedContestName').textContent = `${contest.title}`;
     document.getElementById('registrationModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+
+    // Pre-fill email if available
+    if (currentUser && currentUser.email) {
+        document.getElementById('email').value = currentUser.email;
+    }
 }
 
 // Close registration modal
@@ -323,7 +378,7 @@ async function handleFormSubmit(e) {
     };
 
     try {
-        const token = localStorage.getItem('token');
+        const token = getAuthToken();
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -381,7 +436,13 @@ window.addEventListener('click', (e) => {
 
 // Logout function
 function logout() {
+    // Clear both possible token keys
     localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('rememberMe');
+
+    // Show logout message
+    alert('You have been logged out successfully.');
     window.location.href = 'login.html';
 }

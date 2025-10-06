@@ -50,24 +50,52 @@
         </div>
     </aside>
 
+    <!-- Public Navigation Header -->
+    <header class="public-header" id="publicHeader">
+        <div class="header-container">
+            <div class="logo-area">
+                <i class="fas fa-trophy"></i>
+                <span class="logo-text">Contest Hub</span>
+            </div>
+            <nav class="header-nav">
+                <a href="login.html" class="nav-link">Login</a>
+                <a href="register.html" class="nav-link nav-link-primary">Sign Up</a>
+            </nav>
+        </div>
+    </header>
+
     <!-- Main Content -->
     <main class="main-content" id="mainContent">
-        <!-- Hero Section -->
-        <section class="hero-section" id="publicHero">
-            <div class="hero-content">
-                <div class="hero-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <h1 class="hero-title">Discover Amazing Contests</h1>
-                <p class="hero-subtitle">Join exciting competitions, showcase your talent, and win incredible prizes!
-                </p>
-                <div class="hero-actions">
-                    <button class="btn-hero-primary" id="loginBtn" onclick="window.location.href='login.html'">
-                        <i class="fas fa-sign-in-alt"></i> Login to Register
+        <!-- Simple Hero Section -->
+        <section class="simple-hero" id="publicHero" style="display: none;">
+            <div class="hero-wrapper">
+                <h1 class="main-title">Find Your Next Contest</h1>
+                <p class="main-subtitle">Discover competitions, showcase your talent, and win amazing prizes</p>
+                <div class="hero-cta">
+                    <button class="btn-cta-primary" onclick="window.location.href='register.html'">
+                        Get Started
                     </button>
-                    <button class="btn-hero-secondary"
-                        onclick="document.getElementById('contestsSection').scrollIntoView({behavior: 'smooth'})">
-                        <i class="fas fa-search"></i> Browse Contests
+                    <button class="btn-cta-secondary" onclick="window.location.href='login.html'">
+                        Sign In
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logged-in User Section -->
+        <section class="user-welcome" id="welcomeSection" style="display: none;">
+            <div class="welcome-bar">
+                <h2>Welcome back, <span id="welcomeUserName">User</span>!</h2>
+                <div class="quick-links">
+                    <a href="profile.html#create" class="quick-link">
+                        <i class="fas fa-plus-circle"></i> Create Contest
+                    </a>
+                    <a href="dashboard.html" class="quick-link">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                    <button class="btn-refresh-small" id="refreshBtn" onclick="refreshContests()"
+                        style="display: none;">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
             </div>
@@ -75,36 +103,28 @@
 
         <!-- Contests Section -->
         <section class="contests-section" id="contestsSection">
-            <div class="section-header">
-                <div class="section-title-area">
-                    <h2 class="section-title">
-                        <i class="fas fa-trophy"></i> All Contests
-                    </h2>
-                    <p class="section-subtitle">Explore all available contests and register to participate</p>
-                </div>
-                <button class="btn-refresh" id="refreshBtn" onclick="refreshContests()" style="display: none;">
-                    <i class="fas fa-sync-alt"></i> Refresh
-                </button>
+            <div class="section-simple-header">
+                <h2 class="section-simple-title">Available Contests</h2>
+                <p class="section-simple-subtitle">Browse and join exciting competitions</p>
             </div>
 
-            <!-- Search and Filter Bar -->
-            <div class="search-filter-bar">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="contestSearch" placeholder="Search contests by title or description...">
+            <!-- Simple Search Bar -->
+            <div class="simple-search-bar">
+                <div class="search-input-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="contestSearch" class="search-input" placeholder="Search contests...">
                 </div>
-                <div class="filter-controls">
-                    <select id="statusFilter" class="filter-select">
-                        <option value="all">All Status</option>
+                <div class="simple-filters">
+                    <select id="statusFilter" class="simple-select">
                         <option value="Active" selected>Active</option>
+                        <option value="all">All Status</option>
                         <option value="Upcoming">Upcoming</option>
                         <option value="Completed">Completed</option>
                     </select>
-                    <select id="sortBy" class="filter-select">
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
+                    <select id="sortBy" class="simple-select">
+                        <option value="newest">Latest</option>
                         <option value="ending">Ending Soon</option>
-                        <option value="spots">Most Spots</option>
+                        <option value="spots">Most Available</option>
                     </select>
                 </div>
             </div>
@@ -219,8 +239,17 @@
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Social Media Contest Manager | Fair & Transparent</p>
+    <!-- Simple Footer -->
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <p>&copy; 2025 Contest Hub - Fair & Transparent Contest Management</p>
+            <div class="footer-links">
+                <a href="#" class="footer-link">About</a>
+                <a href="#" class="footer-link">Terms</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="#" class="footer-link">Contact</a>
+            </div>
+        </div>
     </footer>
 
     <!-- Scripts -->
