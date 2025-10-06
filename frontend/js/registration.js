@@ -242,7 +242,7 @@ function showNoContests() {
 }
 
 // Open registration modal
-function openRegistrationModal(contest) {
+async function openRegistrationModal(contest) {
     // Check authentication
     if (!isLoggedIn) {
         if (confirm('You need to be logged in to register for contests. Would you like to go to the login page?')) {
@@ -252,6 +252,14 @@ function openRegistrationModal(contest) {
     }
 
     selectedContestId = contest._id;
+
+    // Check if user is already registered for this contest
+    const isAlreadyRegistered = await checkIfAlreadyRegistered(contest._id);
+    if (isAlreadyRegistered) {
+        alert('You have already registered for this contest!');
+        return;
+    }
+
     document.getElementById('selectedContestName').textContent = `${contest.title}`;
     document.getElementById('registrationModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -264,6 +272,42 @@ function openRegistrationModal(contest) {
         if (currentUser.email) {
             document.getElementById('email').value = currentUser.email;
         }
+    }
+}
+
+// Check if user is already registered for a contest
+async function checkIfAlreadyRegistered(contestId) {
+    if (!currentUser || !currentUser.email) {
+        return false;
+    }
+
+    try {
+        const token = getAuthToken();
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(
+            `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PARTICIPANTS}/check-duplicate`,
+            {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    email: currentUser.email,
+                    phone: '', // Will be checked with actual phone during registration
+                    contestId: contestId
+                })
+            }
+        );
+
+        const result = await response.json();
+        return result.success && result.isDuplicate;
+    } catch (error) {
+        console.error('Error checking duplicate registration:', error);
+        return false; // Allow registration attempt if check fails
     }
 }
 
@@ -410,7 +454,13 @@ async function handleFormSubmit(e) {
             // Reset form
             form.reset();
         } else {
-            alert(result.message || 'Registration failed. Please try again.');
+            // Handle duplicate registration error
+            if (result.duplicate) {
+                alert('You have already registered for this contest!');
+                closeRegistrationModal();
+            } else {
+                alert(result.message || 'Registration failed. Please try again.');
+            }
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
