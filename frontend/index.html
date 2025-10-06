@@ -15,30 +15,44 @@
 <body>
     <!-- Sidebar -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleMobileSidebar()"></div>
+
     <aside class="sidebar" id="sidebar" style="display: none;">
         <div class="sidebar-header">
             <div class="logo">
                 <i class="fas fa-trophy"></i>
                 <span>Contest Pro</span>
             </div>
+            <button class="toggle-btn desktop-only" onclick="toggleSidebar()">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
+
         <nav class="sidebar-menu">
             <div class="menu-section">
                 <div class="menu-title">Main</div>
                 <a href="index.html" class="menu-item active"><i class="fas fa-home"></i><span>Home</span></a>
                 <a href="dashboard.html" class="menu-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
                 <a href="profile.html" class="menu-item"><i class="fas fa-user-circle"></i><span>My Profile</span></a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Quick Actions</div>
                 <a href="profile.html#create" class="menu-item"><i class="fas fa-plus-circle"></i><span>New
                         Contest</span></a>
                 <a href="profile.html#contests" class="menu-item"><i class="fas fa-trophy"></i><span>My
                         Contests</span></a>
                 <a href="profile.html#participants" class="menu-item"><i
                         class="fas fa-users"></i><span>Participants</span></a>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">Account</div>
                 <a href="profile.html#settings" class="menu-item"><i class="fas fa-cog"></i><span>Settings</span></a>
                 <a href="#" class="menu-item" onclick="logout(); return false;"><i
                         class="fas fa-sign-out-alt"></i><span>Logout</span></a>
             </div>
         </nav>
+
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar" id="userAvatar">U</div>
@@ -65,7 +79,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
+    <main class="main-content" id="mainContent" style="margin-left: 0; transition: margin-left 0.3s ease;">
         <!-- Simple Hero Section -->
         <section class="simple-hero" id="publicHero" style="display: none;">
             <div class="hero-wrapper">
@@ -85,7 +99,12 @@
         <!-- Logged-in User Section -->
         <section class="user-welcome" id="welcomeSection" style="display: none;">
             <div class="welcome-bar">
-                <h2>Welcome back, <span id="welcomeUserName">User</span>!</h2>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" style="display: none;">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>Welcome back, <span id="welcomeUserName">User</span>!</h2>
+                </div>
                 <div class="quick-links">
                     <a href="profile.html#create" class="quick-link">
                         <i class="fas fa-plus-circle"></i> Create Contest

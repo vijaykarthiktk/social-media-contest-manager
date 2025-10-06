@@ -532,7 +532,7 @@ footer a {
     padding: 0;
     position: sticky;
     top: 0;
-    z-index: 1000;
+    z-index: 999;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -1464,6 +1464,17 @@ footer a {
 
 /* Responsive */
 @media (max-width: 768px) {
+
+    /* Remove sidebar margin on mobile - sidebar becomes overlay */
+    .main-content {
+        margin-left: 0 !important;
+    }
+
+    /* Show mobile menu button on smaller screens when logged in */
+    .user-welcome .mobile-menu-btn {
+        display: flex !important;
+    }
+
     .header-container {
         padding: 1rem;
     }
