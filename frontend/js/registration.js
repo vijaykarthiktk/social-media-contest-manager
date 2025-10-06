@@ -256,9 +256,14 @@ function openRegistrationModal(contest) {
     document.getElementById('registrationModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
-    // Pre-fill email if available
-    if (currentUser && currentUser.email) {
-        document.getElementById('email').value = currentUser.email;
+    // Pre-fill name and email if available
+    if (currentUser) {
+        if (currentUser.name) {
+            document.getElementById('name').value = currentUser.name;
+        }
+        if (currentUser.email) {
+            document.getElementById('email').value = currentUser.email;
+        }
     }
 }
 
