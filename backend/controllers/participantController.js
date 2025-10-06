@@ -20,6 +20,14 @@ exports.registerParticipant = async (req, res) => {
             referredBy
         } = req.body;
 
+        // Validate required fields
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: 'Mobile number is required'
+            });
+        }
+
         // Validate contest exists and is active
         const contest = await Contest.findById(contestId);
         if (!contest) {

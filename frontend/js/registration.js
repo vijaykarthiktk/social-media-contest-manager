@@ -370,9 +370,6 @@ async function handleFormSubmit(e) {
         name: document.getElementById('name').value,
         email: document.getElementById('email').value,
         phone: document.getElementById('phone').value,
-        socialMediaHandle: document.getElementById('profileUrl').value,
-        platform: document.getElementById('platform').value,
-        followerCount: parseInt(document.getElementById('followerCount').value),
         bio: document.getElementById('bio').value,
         contestId: selectedContestId
     };
